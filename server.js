@@ -63,7 +63,7 @@ const server = http.createServer((req, res) => {
         fs.readFile(CATEGORY_FILE, (error, content) => {
             if (error) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(['常用', '管理地址', '学习资源', '社区论坛', '个人网站']));
+                res.end(JSON.stringify(['常用', '开发工具', '搜索引擎', '学习资源', '社区论坛', '其他']));
             } else {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(content);

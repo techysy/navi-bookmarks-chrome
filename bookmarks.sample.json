@@ -94,5 +94,21 @@
     "icon": "🐳",
     "category": "开发工具",
     "order": 11
+  },
+  {
+    "id": 13,
+    "name": "我的个人网站",
+    "url": "https://shiyangyu.com/about",
+    "icon": "📱",
+    "category": "常用",
+    "order": 12
+  },
+  {
+    "id": 14,
+    "name": "我的GitHub",
+    "url": "https://github.com/techysy",
+    "icon": "👨‍💻",
+    "category": "常用",
+    "order": 13
   }
 ]

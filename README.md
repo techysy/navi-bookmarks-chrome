@@ -10,6 +10,8 @@
 - **📱 响应式设计**：完美适配桌面端和移动端
 - **💾 数据持久化**：本地存储 + 服务器同步
 - **🌐 局域网访问**：支持通过局域网IP访问
+- **📌 常用分类**：默认显示"常用"分类，方便快速访问常用网站
+- **🔧 交互式管理**：PowerShell脚本支持菜单交互，可选择前台/后台运行
 
 ## 🛠️ 技术栈
 
@@ -27,7 +29,7 @@
 ```bash
 # 克隆仓库
 git clone <repository-url>
-cd zhzx
+cd navi-bookmarks-nodejs    
 
 # 检查 Node.js 版本
 node --version
@@ -37,15 +39,37 @@ node --version
 
 ### 方式一：PowerShell (推荐)
 
+运行脚本后会显示交互式菜单：
+
 ```powershell
-# 启动服务器
+# 显示交互式菜单（默认）
 .\start.ps1
+```
+
+菜单选项：
+- `[S]` 启动服务器 (前台运行)
+- `[B]` 启动服务器 (后台运行)
+- `[T]` 停止服务器
+- `[C]` 查看状态
+- `[Q]` 退出
+
+也可以直接使用参数：
+
+```powershell
+# 前台启动服务器
+.\start.ps1 -Action start
+
+# 后台启动服务器（不占用终端）
+.\start.ps1 -Action start-bg
 
 # 停止服务器
 .\start.ps1 -Action stop
 
 # 检查状态
 .\start.ps1 -Action status
+
+# 显示菜单
+.\start.ps1 -Action menu
 ```
 
 ### 方式二：直接运行 Node.js

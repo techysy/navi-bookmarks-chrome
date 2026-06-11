@@ -852,6 +852,104 @@
             background: #ccc;
             cursor: not-allowed;
         }
+
+        .import-export-panel {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .ie-toggle {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+        }
+
+        .ie-toggle:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.25);
+            opacity: 1;
+        }
+
+        .ie-toggle:active {
+            transform: scale(0.98);
+        }
+
+        .ie-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 180px;
+            overflow: hidden;
+        }
+
+        .ie-menu.active {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ie-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: #333;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ie-btn:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .ie-btn:active {
+            transform: translateX(5px) scale(0.98);
+        }
+    }
     </style>
 </head>
 <body>
@@ -938,10 +1036,10 @@
                     <label for="categoryInput">分类</label>
                     <select id="categoryInput" onchange="handleCategoryChange(); setFormDirty()">
                         <option value="常用">常用</option>
-                        <option value="管理地址">管理地址</option>
+                        <option value="开发工具">开发工具</option>
+                        <option value="搜索引擎">搜索引擎</option>
                         <option value="学习资源">学习资源</option>
                         <option value="社区论坛">社区论坛</option>
-                        <option value="个人网站">个人网站</option>
                         <option value="其他">其他</option>
                         <option value="__new__">+ 添加新分类</option>
                     </select>
@@ -978,6 +1076,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="import-export-panel" id="importExportPanel">
+            <button class="ie-toggle" onclick="toggleImportExport()">📥</button>
+            <div class="ie-menu" id="ieMenu">
+                <button class="ie-btn" onclick="exportBookmarks()">📤 导出书签</button>
+                <button class="ie-btn" onclick="triggerImport()">📥 导入书签</button>
+            </div>
+        </div>
+
+        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImportFile()">
+
     </div>
 
     <script>
@@ -985,21 +1094,25 @@
         const JSON_FILE = 'bookmarks.json';
 
         const defaultBookmarks = [
-            { id: 1, name: '我的博客', url: 'https://shiyangyu.com', icon: '👨‍💻', category: '个人网站' },
-            { id: 2, name: 'Google', url: 'https://www.google.com', icon: '🔍', category: '其他' },
-            { id: 3, name: 'GitHub', url: 'https://github.com', icon: '💻', category: '管理地址' },
-            { id: 4, name: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '❓', category: '社区论坛' },
-            { id: 5, name: 'MDN Web Docs', url: 'https://developer.mozilla.org', icon: '📖', category: '学习资源' },
-            { id: 6, name: 'Vue.js', url: 'https://vuejs.org', icon: '💚', category: '管理地址' },
-            { id: 7, name: 'React', url: 'https://react.dev', icon: '⚛️', category: '管理地址' },
-            { id: 8, name: 'TypeScript', url: 'https://www.typescriptlang.org', icon: '📘', category: '管理地址' },
-            { id: 9, name: '掘金', url: 'https://juejin.cn', icon: '⛏️', category: '社区论坛' },
-            { id: 10, name: 'SegmentFault', url: 'https://segmentfault.com', icon: '💡', category: '社区论坛' },
-            { id: 11, name: 'CSDN', url: 'https://www.csdn.net', icon: '📝', category: '社区论坛' },
-            { id: 12, name: 'LeetCode', url: 'https://leetcode.cn', icon: '🧮', category: '学习资源' }
+            { id: 1, name: '我的微博', url: 'https://weibo.com', icon: '📱', category: '常用' },
+            { id: 2, name: '我的GitHub', url: 'https://github.com', icon: '👨‍💻', category: '常用' },
+            { id: 3, name: 'Google', url: 'https://www.google.com', icon: '🔍', category: '搜索引擎' },
+            { id: 4, name: 'GitHub', url: 'https://github.com', icon: '💻', category: '开发工具' },
+            { id: 5, name: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '❓', category: '社区论坛' },
+            { id: 6, name: 'MDN Web Docs', url: 'https://developer.mozilla.org', icon: '📖', category: '学习资源' },
+            { id: 7, name: 'Vue.js', url: 'https://vuejs.org', icon: '💚', category: '开发工具' },
+            { id: 8, name: 'React', url: 'https://react.dev', icon: '⚛️', category: '开发工具' },
+            { id: 9, name: 'TypeScript', url: 'https://www.typescriptlang.org', icon: '📘', category: '开发工具' },
+            { id: 10, name: '掘金', url: 'https://juejin.cn', icon: '⛏️', category: '社区论坛' },
+            { id: 11, name: 'SegmentFault', url: 'https://segmentfault.com', icon: '💡', category: '社区论坛' },
+            { id: 12, name: 'CSDN', url: 'https://www.csdn.net', icon: '📝', category: '社区论坛' },
+            { id: 13, name: 'LeetCode', url: 'https://leetcode.cn', icon: '🧮', category: '学习资源' },
+            { id: 14, name: '百度', url: 'https://www.baidu.com', icon: '🅱️', category: '搜索引擎' },
+            { id: 15, name: 'npm', url: 'https://www.npmjs.com', icon: '📦', category: '开发工具' },
+            { id: 16, name: 'Docker', url: 'https://www.docker.com', icon: '🐳', category: '开发工具' }
         ];
 
-        let defaultCategories = ['常用', '管理地址', '学习资源', '社区论坛', '个人网站'];
+       let defaultCategories = ['常用', '开发工具', '搜索引擎', '学习资源', '社区论坛', '其他'];
 
         async function loadCategoryOrder() {
             try {
@@ -1010,15 +1123,15 @@
                     localStorage.setItem('categoryOrder', JSON.stringify(data));
                 }
             } catch {
-                const saved = localStorage.getItem('categoryOrder');
-                if (saved) {
-                    try {
-                        defaultCategories = JSON.parse(saved);
-                    } catch {
-                        defaultCategories = ['常用', '管理地址', '学习资源', '社区论坛', '个人网站'];
+                    const saved = localStorage.getItem('categoryOrder');
+                    if (saved) {
+                        try {
+                            defaultCategories = JSON.parse(saved);
+                        } catch {
+                            defaultCategories = ['常用', '开发工具', '搜索引擎', '学习资源', '社区论坛', '其他'];
+                        }
                     }
                 }
-            }
         }
 
         let bookmarks = [];
@@ -1162,7 +1275,7 @@
         function updateCategories() {
             const allCategories = [...new Set(bookmarks.map(b => b.category))];
             
-            const defaultCats = defaultCategories.filter(cat => cat !== '其他' && allCategories.includes(cat));
+            const defaultCats = defaultCategories.filter(cat => cat !== '其他');
             
             const sortedCategories = [...defaultCats];
             
@@ -1170,7 +1283,7 @@
             customCategories.sort();
             sortedCategories.push(...customCategories);
             
-            if (allCategories.includes('其他')) {
+            if (allCategories.includes('其他') || !sortedCategories.includes('其他')) {
                 sortedCategories.push('其他');
             }
             
@@ -1252,7 +1365,101 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            document.getElementById('ieMenu').classList.remove('active');
         }
+
+        function toggleImportExport() {
+            const menu = document.getElementById('ieMenu');
+            menu.classList.toggle('active');
+        }
+
+        function triggerImport() {
+            document.getElementById('importFile').click();
+            document.getElementById('ieMenu').classList.remove('active');
+        }
+
+        function handleImportFile() {
+            const fileInput = document.getElementById('importFile');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!Array.isArray(importedData)) {
+                        alert('无效的书签数据格式');
+                        return;
+                    }
+
+                    if (importedData.length === 0) {
+                        alert('导入的书签数据为空');
+                        return;
+                    }
+
+                    const importMode = prompt(`检测到 ${importedData.length} 个书签，选择导入方式：\n1 - 追加到现有书签\n2 - 替换所有书签`);
+                    
+                    if (importMode !== '1' && importMode !== '2') {
+                        alert('取消导入');
+                        return;
+                    }
+
+                    let maxId = Math.max(...bookmarks.map(b => b.id), 0);
+
+                    if (importMode === '2') {
+                        bookmarks = [];
+                        maxId = 0;
+                    }
+                    
+                    const existingCategories = [...new Set(bookmarks.map(b => b.category))];
+                    const newCategories = new Set();
+                    
+                    importedData.forEach((item, index) => {
+                        const bookmarkCategory = item.category || '其他';
+                        if (!existingCategories.includes(bookmarkCategory) && !bookmarks.some(b => b.category === bookmarkCategory)) {
+                            newCategories.add(bookmarkCategory);
+                        }
+                        const newBookmark = {
+                            id: ++maxId,
+                            name: item.name || '未命名',
+                            url: item.url || '',
+                            icon: item.icon || '🔗',
+                            category: bookmarkCategory,
+                            order: bookmarks.length + index,
+                            description: item.description || ''
+                        };
+                        bookmarks.push(newBookmark);
+                    });
+
+                    saveBookmarks();
+                    updateCategories();
+                    renderBookmarks();
+                    
+                    let message = `成功导入 ${importedData.length} 个书签！`;
+                    if (newCategories.size > 0) {
+                        message += `\n\n新增分类：${[...newCategories].join('、')}`;
+                    }
+                    alert(message);
+                    
+                } catch (error) {
+                    alert('导入失败：无效的JSON文件');
+                }
+            };
+
+            reader.readAsText(file);
+            fileInput.value = '';
+        }
+
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('importExportPanel');
+            if (panel && !panel.contains(e.target)) {
+                document.getElementById('ieMenu').classList.remove('active');
+            }
+        });
 
         function renderCategories() {
             const filter = document.getElementById('categoryFilter');
@@ -1589,18 +1796,15 @@
             // 排除"其他"后再添加默认分类
             const defaultCats = defaultCategories.filter(cat => cat !== '其他');
             
-            defaultCats.forEach(cat => {
-                if (allCategories.includes(cat)) {
-                    sortedCategories.push(cat);
-                }
-            });
+            // 默认分类始终显示，无论是否有书签
+            sortedCategories.push(...defaultCats);
             
             const customCategories = allCategories.filter(cat => !defaultCats.includes(cat) && cat !== '其他');
             customCategories.sort();
             sortedCategories.push(...customCategories);
             
             // "其他"始终放在最后
-            if (allCategories.includes('其他')) {
+            if (!sortedCategories.includes('其他')) {
                 sortedCategories.push('其他');
             }
 
