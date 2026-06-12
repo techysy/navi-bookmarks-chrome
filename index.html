@@ -1313,6 +1313,7 @@
             await loadBookmarks();
             updateCategories();
             renderBookmarks();
+            setupCategoryScroll();
             
             if (CONFIG.enableImportExport) {
                 document.getElementById('importExportPanel').style.display = 'block';
@@ -1475,6 +1476,59 @@
                 <button class="category-tag ${cat === currentCategory ? 'active' : ''}" 
                         onclick="filterByCategory('${cat}')">${cat}</button>
             `).join('');
+        }
+
+        function setupCategoryScroll() {
+            const filter = document.getElementById('categoryFilter');
+            const bookmarkContent = document.getElementById('bookmarkContent');
+            let isHoveringFilter = false;
+            let isHoveringBookmarks = false;
+            
+            filter.addEventListener('mouseenter', function() {
+                isHoveringFilter = true;
+            });
+            
+            filter.addEventListener('mouseleave', function() {
+                isHoveringFilter = false;
+            });
+            
+            bookmarkContent.addEventListener('mouseenter', function() {
+                isHoveringBookmarks = true;
+            });
+            
+            bookmarkContent.addEventListener('mouseleave', function() {
+                isHoveringBookmarks = false;
+            });
+            
+            function handleWheel(e) {
+                if (!isHoveringFilter && !isHoveringBookmarks) {
+                    return;
+                }
+                
+                if (currentCategory === '全部') {
+                    return;
+                }
+                
+                e.preventDefault();
+                
+                const nonAllCategories = categories.filter(c => c !== '全部');
+                let currentIndex = nonAllCategories.indexOf(currentCategory);
+                
+                if (currentIndex === -1) {
+                    currentIndex = 0;
+                }
+                
+                if (e.deltaX > 0 || e.deltaY > 0) {
+                    currentIndex = (currentIndex + 1) % nonAllCategories.length;
+                } else if (e.deltaX < 0 || e.deltaY < 0) {
+                    currentIndex = (currentIndex - 1 + nonAllCategories.length) % nonAllCategories.length;
+                }
+                
+                filterByCategory(nonAllCategories[currentIndex]);
+            }
+            
+            filter.addEventListener('wheel', handleWheel);
+            bookmarkContent.addEventListener('wheel', handleWheel);
         }
 
         function filterByCategory(category) {
