@@ -145,6 +145,19 @@ server.listen(8080, () => {
 
 编辑 `categoryOrder.json` 文件自定义默认分类顺序。
 
+### 导入导出功能开关
+
+编辑 `index.html` 第 1096-1098 行，设置是否启用导入导出功能：
+
+```javascript
+const CONFIG = {
+    enableImportExport: true  // 设置为 false 可禁用导入导出功能
+};
+```
+
+- `enableImportExport: true` - 启用导入导出功能（默认）
+- `enableImportExport: false` - 禁用导入导出功能，右下角按钮将不会显示
+
 ## 📄 许可证
 
 MIT License

@@ -1077,7 +1077,7 @@
             </div>
         </div>
 
-        <div class="import-export-panel" id="importExportPanel">
+        <div class="import-export-panel" id="importExportPanel" style="display: none;">
             <button class="ie-toggle" onclick="toggleImportExport()">📥</button>
             <div class="ie-menu" id="ieMenu">
                 <button class="ie-btn" onclick="exportBookmarks()">📤 导出书签</button>
@@ -1092,6 +1092,10 @@
     <script>
         const STORAGE_KEY = 'bookmarks';
         const JSON_FILE = 'bookmarks.json';
+        
+        const CONFIG = {
+            enableImportExport: true
+        };
 
         const defaultBookmarks = [
             { id: 1, name: '我的微博', url: 'https://weibo.com', icon: '📱', category: '常用' },
@@ -1309,6 +1313,10 @@
             await loadBookmarks();
             updateCategories();
             renderBookmarks();
+            
+            if (CONFIG.enableImportExport) {
+                document.getElementById('importExportPanel').style.display = 'block';
+            }
         }
 
         async function loadBookmarks() {
