@@ -1194,6 +1194,12 @@
                     const results = searchBookmarks(query);
                     if (results.length > 0) {
                         openBookmark(results[0].url);
+                    } else {
+                        const firstEngine = Object.keys(searchEngines).find(key => key !== 'bookmarks');
+                        if (firstEngine) {
+                            const url = searchEngines[firstEngine].url + encodeURIComponent(query);
+                            window.open(url, '_blank');
+                        }
                     }
                 } else {
                     const url = searchEngines[currentSearchEngine].url + encodeURIComponent(query);
