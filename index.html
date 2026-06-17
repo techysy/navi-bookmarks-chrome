@@ -960,7 +960,7 @@
         </header>
 
         <div class="search-bar">
-            <div class="search-container">
+            <form id="searchForm" class="search-container">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="searchInput" class="search-input" placeholder="搜索书签或使用搜索引擎..." onkeyup="handleSearch(event)">
                 <div class="search-engine-selector" onclick="toggleSearchEngineDropdown()">
@@ -1005,7 +1005,7 @@
                     </div>
                 </div>
                 <div class="search-results" id="searchResults"></div>
-            </div>
+            </form>
             <button class="add-btn" onclick="openAddModal()">+ 添加书签</button>
             <button class="add-btn" onclick="openCategoryModal()">📁 编辑分类</button>
         </div>
@@ -1174,20 +1174,8 @@
 
         function handleSearch(event) {
             if (event.key === 'Enter') {
-                const query = event.target.value.trim();
-                if (query) {
-                    if (currentSearchEngine === 'bookmarks') {
-                        const results = searchBookmarks(query);
-                        if (results.length > 0) {
-                            openBookmark(results[0].url);
-                        }
-                    } else {
-                        const url = searchEngines[currentSearchEngine].url + encodeURIComponent(query);
-                        window.open(url, '_blank');
-                    }
-                    document.getElementById('searchResults').innerHTML = '';
-                    event.target.value = '';
-                }
+                event.preventDefault();
+                performEnterSearch();
             } else {
                 const query = event.target.value.trim();
                 if (query && currentSearchEngine === 'bookmarks') {
@@ -1197,6 +1185,29 @@
                 }
             }
         }
+
+        function performEnterSearch() {
+            const input = document.getElementById('searchInput');
+            const query = input.value.trim();
+            if (query) {
+                if (currentSearchEngine === 'bookmarks') {
+                    const results = searchBookmarks(query);
+                    if (results.length > 0) {
+                        openBookmark(results[0].url);
+                    }
+                } else {
+                    const url = searchEngines[currentSearchEngine].url + encodeURIComponent(query);
+                    window.open(url, '_blank');
+                }
+                document.getElementById('searchResults').innerHTML = '';
+                input.value = '';
+            }
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            performEnterSearch();
+        });
 
         function performSearch(query) {
             const results = searchBookmarks(query);
