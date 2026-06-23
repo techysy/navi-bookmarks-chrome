@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$false)]
-    [string]$Action = "menu"
+    [string]$Action = "start"
 )
 
 $scriptPath = $PSScriptRoot
@@ -66,39 +66,29 @@ function Start-Server([bool]$Background = $false) {
 
     if ($Background) {
         $process = Start-Process -FilePath "node" -ArgumentList $serverScript -WorkingDirectory $scriptPath -WindowStyle Hidden -PassThru
-    } else {
-        $process = Start-Process -FilePath "node" -ArgumentList $serverScript -WorkingDirectory $scriptPath -NoNewWindow -PassThru
-    }
-
-    $process.Id | Out-File -FilePath $pidFile -Encoding UTF8
-
-    Start-Sleep -Seconds 2
-
-    if (Get-Process -Id $process.Id -ErrorAction SilentlyContinue) {
-        Write-Host "Server started successfully!" -ForegroundColor Green
-        Write-Host "PID: $($process.Id)" -ForegroundColor White
-        Write-Host "Local:    http://localhost:8080/index.html" -ForegroundColor White
-        foreach ($ip in $lanIPs) {
-            Write-Host "Network:  http://$ip`:8080/index.html" -ForegroundColor White
-        }
-        Write-Host ""
-        if ($Background) {
-            Write-Host "Server running in background" -ForegroundColor Gray
-            Write-Host "Stop server: .\start.ps1 -Action stop" -ForegroundColor Gray
+        $process.Id | Out-File -FilePath $pidFile -Encoding UTF8
+        Start-Sleep -Seconds 2
+        if (Get-Process -Id $process.Id -ErrorAction SilentlyContinue) {
+            Write-Host "Server started in background!" -ForegroundColor Green
+            Write-Host "PID: $($process.Id)" -ForegroundColor White
+            Write-Host "Local:    http://localhost:8080/index.html" -ForegroundColor White
+            foreach ($ip in $lanIPs) {
+                Write-Host "Network:  http://$ip`:8080/index.html" -ForegroundColor White
+            }
             Write-Host ""
+            Write-Host "Stop: .\start.ps1 -Action stop" -ForegroundColor Gray
         } else {
-            Write-Host "Press Ctrl+C to stop server" -ForegroundColor Gray
+            Write-Host "Server failed to start" -ForegroundColor Red
+            if (Test-Path $pidFile) { Remove-Item $pidFile }
         }
-        if (-not $Background) {
-            Write-Host "Press any key to exit..."
-            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        }
-    } else {
-        Write-Host "Server failed to start" -ForegroundColor Red
-        if (Test-Path $pidFile) { Remove-Item $pidFile }
         Write-Host ""
         Write-Host "Press any key to continue..."
         $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    } else {
+        Write-Host "Server starting... (Ctrl+C to stop)" -ForegroundColor Green
+        Write-Host "Local: http://localhost:8080/index.html" -ForegroundColor White
+        Write-Host ""
+        & node $serverScript
     }
 }
 
