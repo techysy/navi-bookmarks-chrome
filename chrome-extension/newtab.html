@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人书签导航</title>
+    <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 书签导航</h1>
+            <p>快速访问您喜爱的网站</p>
+        </header>
+
+        <div class="search-bar">
+            <form id="searchForm" class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索书签或使用搜索引擎...">
+                <div class="search-engine-selector" id="searchEngineSelector">
+                    <span class="search-engine-icon" id="currentEngineIcon">🔍</span>
+                    <span class="search-engine-name" id="currentEngineName"></span>
+                </div>
+                <div class="search-dropdown" id="searchEngineDropdown">
+                    <div class="search-dropdown-item selected" data-engine="bookmarks">
+                        <span class="engine-icon">⭐</span>
+                        <div class="engine-info">
+                            <div class="name">书签搜索</div>
+                            <div class="url">搜索您的书签</div>
+                        </div>
+                    </div>
+                    <div class="search-dropdown-item" data-engine="google">
+                        <span class="engine-icon">🔍</span>
+                        <div class="engine-info">
+                            <div class="name">Google</div>
+                            <div class="url">google.com</div>
+                        </div>
+                    </div>
+                    <div class="search-dropdown-item" data-engine="baidu">
+                        <span class="engine-icon">🅱️</span>
+                        <div class="engine-info">
+                            <div class="name">百度</div>
+                            <div class="url">baidu.com</div>
+                        </div>
+                    </div>
+                    <div class="search-dropdown-item" data-engine="bing">
+                        <span class="engine-icon">🔷</span>
+                        <div class="engine-info">
+                            <div class="name">必应</div>
+                            <div class="url">bing.com</div>
+                        </div>
+                    </div>
+                    <div class="search-dropdown-item" data-engine="duckduckgo">
+                        <span class="engine-icon">🦆</span>
+                        <div class="engine-info">
+                            <div class="name">DuckDuckGo</div>
+                            <div class="url">duckduckgo.com</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="search-results" id="searchResults"></div>
+            </form>
+            <button class="add-btn" id="addBookmarkBtn">+ 添加书签</button>
+            <button class="add-btn" id="editCategoryBtn">📁 编辑分类</button>
+        </div>
+
+        <div class="category-filter" id="categoryFilter">
+        </div>
+
+        <div id="bookmarkContent">
+        </div>
+
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal">
+                <h2 id="modalTitle">添加书签</h2>
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="nameInput">网站名称</label>
+                    <input type="text" id="nameInput" placeholder="输入网站名称">
+                </div>
+                <div class="form-group">
+                    <label for="urlInput">网站地址</label>
+                    <input type="text" id="urlInput" placeholder="输入网站URL或IP地址（可省略http://）">
+                </div>
+                <div class="form-group">
+                    <label for="descriptionInput">描述（可选）</label>
+                    <textarea id="descriptionInput" placeholder="输入网站描述或备注信息"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="categoryInput">分类</label>
+                    <select id="categoryInput">
+                        <option value="常用">常用</option>
+                        <option value="开发工具">开发工具</option>
+                        <option value="搜索引擎">搜索引擎</option>
+                        <option value="学习资源">学习资源</option>
+                        <option value="社区论坛">社区论坛</option>
+                        <option value="其他">其他</option>
+                        <option value="__new__">+ 添加新分类</option>
+                    </select>
+                </div>
+                <div class="form-group" id="newCategoryGroup" style="display: none;">
+                    <label for="newCategoryInput">新分类名称</label>
+                    <input type="text" id="newCategoryInput" placeholder="输入新分类名称">
+                </div>
+                <div class="btn-group">
+                    <button class="cancel-btn" id="cancelModalBtn">取消</button>
+                    <button class="save-btn" id="saveModalBtn">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="categoryModalOverlay">
+            <div class="modal">
+                <h2>📁 编辑分类</h2>
+                <div class="form-group">
+                    <label for="newCatName">添加新分类</label>
+                    <input type="text" id="newCatName" placeholder="输入新分类名称">
+                </div>
+                <button class="add-category-btn" id="addCategoryBtn">
+                    <span class="add-icon">+</span>
+                    <span>添加分类</span>
+                </button>
+                <div style="margin-bottom: 15px; font-size: 0.8rem; color: #999;">
+                    💡 拖动分类可以调整顺序
+                </div>
+                <div id="categoryList" class="category-list">
+                </div>
+                <div class="btn-group">
+                    <button class="cancel-btn" id="closeCategoryModalBtn">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="fab-panel" id="fabPanel">
+            <div class="fab-menu" id="fabMenu">
+                <button class="fab-menu-item" id="exportBtn">📤 导出书签</button>
+                <button class="fab-menu-item" id="importBtn">📥 导入书签</button>
+                <button class="fab-menu-item" id="changeBgBtn">🎨 更换背景</button>
+            </div>
+            <button class="fab-btn" id="ieToggleBtn">⚙️</button>
+        </div>
+
+        <input type="file" id="importFile" style="display: none;" accept=".json">
+
+    </div>
+
+    <script src="newtab.js"></script>
+</body>
+</html>
