@@ -32,7 +32,7 @@
 2. 打开 Chrome 浏览器，访问 `chrome://extensions/`
 3. 开启右上角 **"开发者模式"**
 4. 点击 **"加载已解压的扩展程序"**
-5. 选择 `chrome-extension` 文件夹
+5. 选择 `navi-bookmarks-chrome` 文件夹
 6. 打开新标签页即可看到书签导航页面
 
 ## 🎯 功能说明
@@ -63,6 +63,8 @@
 3. 选择预设主题或上传自定义背景图片
 4. 背景自动保存，下次打开自动应用
 
+> **💡 3K 高清背景**：仓库根目录提供 `Zoigê - 3k.JPG`（3K 分辨率，约 1.7MB），为若尔盖大草原原片。如需更高清的背景体验，可将该文件替换 `navi-bookmarks-chrome/Zoigê.JPG`，或通过上传自定义背景功能直接使用。
+
 ### 导入导出
 
 1. 点击右下角 ⚙️ 按钮
@@ -78,17 +80,18 @@
 
 ```
 navi-bookmarks-chrome/
-├── chrome-extension/            # Chrome 插件目录
-│   ├── manifest.json           # 插件配置文件
-│   ├── newtab.html             # 新标签页入口
-│   ├── newtab.js               # JavaScript 逻辑
-│   ├── newtab.css              # 样式文件
-│   ├── Zoigê.JPG               # 若尔盖大草原背景图
-│   └── icons/                  # 插件图标
-│       ├── icon16.png
-│       ├── icon48.png
-│       └── icon128.png
+├── manifest.json               # 插件配置文件
+├── newtab.html                 # 新标签页入口
+├── newtab.js                   # JavaScript 逻辑
+├── newtab.css                  # 样式文件
+├── Zoigê.JPG                   # 若尔盖大草原背景图（高清 ~680KB）
+├── Zoigê - mini.JPG            # 若尔盖缩略图（用于背景选择器预览）
+├── icons/                      # 插件图标
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
 ├── old/                        # 旧版 Web 项目文件
+├── Zoigê - 3k.JPG              # 若尔盖大草原 3K 超高分辨率原图
 ├── README.md
 ├── CHANGELOG.md
 └── .gitignore
