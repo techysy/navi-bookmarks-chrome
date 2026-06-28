@@ -77,7 +77,7 @@
 ## 📁 项目结构
 
 ```
-navi-bookmarks-nodejs/
+navi-bookmarks-chrome/
 ├── chrome-extension/            # Chrome 插件目录
 │   ├── manifest.json           # 插件配置文件
 │   ├── newtab.html             # 新标签页入口
