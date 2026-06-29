@@ -52,6 +52,100 @@ const searchEngines = {
     duckduckgo: { name: 'DuckDuckGo', icon: '🦆', url: 'https://duckduckgo.com/?q=' }
 };
 
+function createBubbleOverlay() {
+    var overlay = document.createElement('div');
+    overlay.className = 'bubble-overlay';
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function showAlert(message) {
+    return new Promise(function(resolve) {
+        var overlay = createBubbleOverlay();
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML =
+            '<div class="bubble-message">' + message + '</div>' +
+            '<div class="bubble-btn-group">' +
+            '<button class="bubble-btn bubble-btn-ok">确定</button>' +
+            '</div>';
+        overlay.appendChild(bubble);
+        bubble.querySelector('.bubble-btn-ok').addEventListener('click', function() {
+            overlay.remove();
+            resolve();
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) { overlay.remove(); resolve(); }
+        });
+    });
+}
+
+function showConfirm(message, danger) {
+    return new Promise(function(resolve) {
+        var overlay = createBubbleOverlay();
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        var confirmClass = danger ? 'bubble-btn bubble-btn-danger' : 'bubble-btn bubble-btn-confirm';
+        bubble.innerHTML =
+            '<div class="bubble-message">' + message + '</div>' +
+            '<div class="bubble-btn-group">' +
+            '<button class="bubble-btn bubble-btn-cancel">取消</button>' +
+            '<button class="' + confirmClass + '">确定</button>' +
+            '</div>';
+        overlay.appendChild(bubble);
+        bubble.querySelector('.bubble-btn-cancel').addEventListener('click', function() {
+            overlay.remove();
+            resolve(false);
+        });
+        bubble.querySelector('[class*="btn-confirm"], [class*="btn-danger"]').addEventListener('click', function() {
+            overlay.remove();
+            resolve(true);
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) { overlay.remove(); resolve(false); }
+        });
+    });
+}
+
+function showPrompt(message, defaultValue) {
+    return new Promise(function(resolve) {
+        var overlay = createBubbleOverlay();
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML =
+            '<div class="bubble-message">' + message + '</div>' +
+            '<input class="bubble-input" type="text" value="' + (defaultValue || '') + '">' +
+            '<div class="bubble-btn-group">' +
+            '<button class="bubble-btn bubble-btn-cancel">取消</button>' +
+            '<button class="bubble-btn bubble-btn-confirm">确定</button>' +
+            '</div>';
+        overlay.appendChild(bubble);
+        var input = bubble.querySelector('.bubble-input');
+        input.focus();
+        input.select();
+        bubble.querySelector('.bubble-btn-cancel').addEventListener('click', function() {
+            overlay.remove();
+            resolve(null);
+        });
+        bubble.querySelector('.bubble-btn-confirm').addEventListener('click', function() {
+            overlay.remove();
+            resolve(input.value);
+        });
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                overlay.remove();
+                resolve(input.value);
+            } else if (e.key === 'Escape') {
+                overlay.remove();
+                resolve(null);
+            }
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) { overlay.remove(); resolve(null); }
+        });
+    });
+}
+
 function openBookmark(url) {
     if (typeof chrome !== 'undefined' && chrome.tabs) {
         chrome.tabs.create({ url: url });
@@ -430,9 +524,9 @@ function openEditModal(id) {
     }
 }
 
-function closeModal(force) {
+async function closeModal(force) {
     if (!force && hasUnsavedChanges()) {
-        if (!confirm('您有未保存的更改，确定要退出吗？')) return;
+        if (!await showConfirm('您有未保存的更改，确定要退出吗？')) return;
     }
     document.getElementById('modalOverlay').classList.remove('active');
     clearFormDirtyFlag();
@@ -446,7 +540,7 @@ function saveBookmark() {
     let category = document.getElementById('categoryInput').value;
 
     if (!name || !url) {
-        alert('请填写完整信息');
+        showAlert('请填写完整信息');
         return;
     }
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -455,7 +549,7 @@ function saveBookmark() {
     if (category === '__new__') {
         const newCategory = document.getElementById('newCategoryInput').value.trim();
         if (!newCategory) {
-            alert('请输入新分类名称');
+            showAlert('请输入新分类名称');
             return;
         }
         category = newCategory;
@@ -479,8 +573,8 @@ function saveBookmark() {
     closeModal(true);
 }
 
-function deleteBookmark(id) {
-    if (confirm('确定要删除这个书签吗？')) {
+async function deleteBookmark(id) {
+    if (await showConfirm('确定要删除这个书签吗？', true)) {
         bookmarks = bookmarks.filter(function(b) { return b.id !== id; });
         bookmarks.forEach(function(bookmark, index) { bookmark.order = index; });
         saveBookmarks();
@@ -604,10 +698,10 @@ function setupCategoryModalEvents() {
     });
 }
 
-function addCategory() {
+async function addCategory() {
     const name = document.getElementById('newCatName').value.trim();
-    if (!name) { alert('请输入分类名称'); return; }
-    if (bookmarks.some(function(b) { return b.category === name; })) { alert('该分类已存在'); return; }
+    if (!name) { showAlert('请输入分类名称'); return; }
+    if (bookmarks.some(function(b) { return b.category === name; })) { showAlert('该分类已存在'); return; }
     bookmarks.push({
         id: bookmarks.length > 0 ? Math.max(...bookmarks.map(function(b) { return b.id; })) + 1 : 1,
         name: name, url: '#', icon: '📁', category: name, order: bookmarks.length
@@ -618,10 +712,10 @@ function addCategory() {
     renderCategoryList();
 }
 
-function renameCategory(oldName) {
-    const newName = prompt('请输入新的分类名称:', oldName);
+async function renameCategory(oldName) {
+    const newName = await showPrompt('请输入新的分类名称:', oldName);
     if (!newName || newName.trim() === '') return;
-    if (bookmarks.some(function(b) { return b.category === newName.trim(); })) { alert('该分类已存在'); return; }
+    if (bookmarks.some(function(b) { return b.category === newName.trim(); })) { showAlert('该分类已存在'); return; }
     bookmarks = bookmarks.map(function(b) {
         return b.category === oldName ? Object.assign({}, b, { category: newName.trim() }) : b;
     });
@@ -633,8 +727,8 @@ function renameCategory(oldName) {
     renderBookmarks();
 }
 
-function deleteCategory(name) {
-    if (confirm('确定要删除分类 "' + name + '" 吗？该分类下的所有书签将被移到"其他"分类。')) {
+async function deleteCategory(name) {
+    if (await showConfirm('确定要删除分类 "' + name + '" 吗？该分类下的所有书签将被移到"其他"分类。', true)) {
         bookmarks = bookmarks.map(function(b) {
             return b.category === name ? Object.assign({}, b, { category: '其他' }) : b;
         });
@@ -657,7 +751,10 @@ function exportBookmarks() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'bookmarks.json';
+    const now = new Date();
+    const pad = function(n) { return n < 10 ? '0' + n : n; };
+    const dateStr = String(now.getFullYear()).slice(2) + pad(now.getMonth() + 1) + pad(now.getDate()) + '_' + pad(now.getHours()) + pad(now.getMinutes());
+    a.download = 'bookmarks_' + dateStr + '.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -674,43 +771,40 @@ function triggerImport() {
     document.getElementById('fabMenu').classList.remove('active');
 }
 
-function handleImportFile(e) {
+async function handleImportFile(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        try {
-            const importedData = JSON.parse(ev.target.result);
-            if (!Array.isArray(importedData)) { alert('无效的书签数据格式'); return; }
-            if (importedData.length === 0) { alert('导入的书签数据为空'); return; }
-            const importMode = prompt('检测到 ' + importedData.length + ' 个书签，选择导入方式：\n1 - 追加到现有书签\n2 - 替换所有书签');
-            if (importMode !== '1' && importMode !== '2') { alert('取消导入'); return; }
-            let maxId = Math.max(...bookmarks.map(function(b) { return b.id; }), 0);
-            if (importMode === '2') { bookmarks = []; maxId = 0; }
-            const existingCategories = [...new Set(bookmarks.map(function(b) { return b.category; }))];
-            const newCategories = new Set();
-            importedData.forEach(function(item, index) {
-                const bookmarkCategory = item.category || '其他';
-                if (!existingCategories.includes(bookmarkCategory) && !bookmarks.some(function(b) { return b.category === bookmarkCategory; })) {
-                    newCategories.add(bookmarkCategory);
-                }
-                bookmarks.push({
-                    id: ++maxId, name: item.name || '未命名', url: item.url || '',
-                    icon: item.icon || '🔗', category: bookmarkCategory,
-                    order: bookmarks.length + index, description: item.description || ''
-                });
+    try {
+        const text = await file.text();
+        const importedData = JSON.parse(text);
+        if (!Array.isArray(importedData)) { showAlert('无效的书签数据格式'); return; }
+        if (importedData.length === 0) { showAlert('导入的书签数据为空'); return; }
+        const importMode = await showPrompt('检测到 ' + importedData.length + ' 个书签，选择导入方式：\n1 - 追加到现有书签\n2 - 替换所有书签');
+        if (importMode !== '1' && importMode !== '2') { showAlert('取消导入'); return; }
+        let maxId = Math.max(...bookmarks.map(function(b) { return b.id; }), 0);
+        if (importMode === '2') { bookmarks = []; maxId = 0; }
+        const existingCategories = [...new Set(bookmarks.map(function(b) { return b.category; }))];
+        const newCategories = new Set();
+        importedData.forEach(function(item, index) {
+            const bookmarkCategory = item.category || '其他';
+            if (!existingCategories.includes(bookmarkCategory) && !bookmarks.some(function(b) { return b.category === bookmarkCategory; })) {
+                newCategories.add(bookmarkCategory);
+            }
+            bookmarks.push({
+                id: ++maxId, name: item.name || '未命名', url: item.url || '',
+                icon: item.icon || '🔗', category: bookmarkCategory,
+                order: bookmarks.length + index, description: item.description || ''
             });
-            saveBookmarks();
-            updateCategories();
-            renderBookmarks();
-            let message = '成功导入 ' + importedData.length + ' 个书签！';
-            if (newCategories.size > 0) message += '\n\n新增分类：' + [...newCategories].join('、');
-            alert(message);
-        } catch (error) {
-            alert('导入失败：无效的JSON文件');
-        }
-    };
-    reader.readAsText(file);
+        });
+        saveBookmarks();
+        updateCategories();
+        renderBookmarks();
+        let message = '成功导入 ' + importedData.length + ' 个书签！';
+        if (newCategories.size > 0) message += '<br><br>新增分类：' + [...newCategories].join('、');
+        showAlert(message);
+    } catch (error) {
+        showAlert('导入失败：无效的JSON文件');
+    }
     e.target.value = '';
 }
 
@@ -773,10 +867,10 @@ function showBgPicker() {
 
     picker = document.createElement('div');
     picker.id = 'bgPickerOverlay';
-    picker.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;';
+    picker.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.15);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);z-index:2000;display:flex;align-items:center;justify-content:center;animation:bubbleFadeIn 0.1s ease;';
 
     var panel = document.createElement('div');
-    panel.style.cssText = 'background:white;border-radius:16px;padding:24px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+    panel.style.cssText = 'background:white;border-radius:16px;padding:28px 28px 20px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.25);animation:bubblePop 0.125s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
 
     var title = document.createElement('h3');
     title.textContent = '🎨 选择背景';

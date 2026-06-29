@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "个人书签导航",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "个人书签导航新标签页 - 快速访问您喜爱的网站",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
