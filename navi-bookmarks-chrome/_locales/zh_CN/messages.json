@@ -87,6 +87,8 @@
   "langSystem": { "message": "跟随系统" },
   "langZhCN": { "message": "中文" },
   "langEn": { "message": "English" },
+  "langJa": { "message": "日本語" },
+  "langKo": { "message": "한국어" },
   "settingsTitle": { "message": "设置" },
   "addCurrentPage": { "message": "添加当前页" },
   "alertNoTab": { "message": "无法获取当前标签页信息" },

@@ -87,6 +87,8 @@
   "langSystem": { "message": "System" },
   "langZhCN": { "message": "中文" },
   "langEn": { "message": "English" },
+  "langJa": { "message": "日本語" },
+  "langKo": { "message": "한국어" },
   "settingsTitle": { "message": "Settings" },
   "addCurrentPage": { "message": "Add Current Page" },
   "alertNoTab": { "message": "Unable to get current tab info" },

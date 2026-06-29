@@ -36,12 +36,15 @@ function applyI18n() {
 
 function detectSystemLocale() {
     var lang = (typeof chrome !== 'undefined' && chrome.i18n) ? chrome.i18n.getUILanguage() : navigator.language;
-    return lang.startsWith('zh') ? 'zh_CN' : 'en';
+    if (lang.startsWith('zh')) return 'zh_CN';
+    if (lang.startsWith('ja')) return 'ja';
+    if (lang.startsWith('ko')) return 'ko';
+    return 'en';
 }
 
 function loadLangPacks() {
     return new Promise(function(resolve) {
-        var locales = ['zh_CN', 'en'];
+        var locales = ['zh_CN', 'en', 'ja', 'ko'];
         var loaded = 0;
         locales.forEach(function(locale) {
             var url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
