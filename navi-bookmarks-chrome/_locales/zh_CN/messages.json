@@ -36,9 +36,9 @@
   "modalEditCategory": { "message": "📁 编辑分类" },
   "addNewCategory": { "message": "添加新分类" },
   "placeholderEnterCategoryName": { "message": "输入新分类名称" },
-  "exportBookmarks": { "message": "📤 导出书签" },
-  "importBookmarks": { "message": "📥 导入书签" },
-  "changeBackground": { "message": "🎨 更换背景" },
+  "exportBookmarks": { "message": "导出书签" },
+  "importBookmarks": { "message": "导入书签" },
+  "changeBackground": { "message": "更换背景" },
   "chooseBackground": { "message": "🎨 选择背景" },
   "uploadCustomBackground": { "message": "📁 上传自定义背景" },
   "emptyStateTitle": { "message": "暂无书签" },
@@ -83,9 +83,13 @@
   "myGithub": { "message": "我的GitHub" },
   "juejin": { "message": "掘金" },
   "bookmarks": { "message": "书签" },
-  "language": { "message": "🌐 语言" },
+  "language": { "message": "语言" },
   "langSystem": { "message": "跟随系统" },
   "langZhCN": { "message": "中文" },
   "langEn": { "message": "English" },
-  "settingsTitle": { "message": "设置" }
+  "settingsTitle": { "message": "设置" },
+  "addCurrentPage": { "message": "添加当前页" },
+  "alertNoTab": { "message": "无法获取当前标签页信息" },
+  "openBookmarkNav": { "message": "打开书签导航" },
+  "popupTitle": { "message": "书签导航 - 添加当前页" }
 }

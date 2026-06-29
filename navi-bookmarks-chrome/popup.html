@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="appName">个人书签导航</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 280px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            color: #333;
+        }
+        .popup-header {
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .popup-header h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .popup-body {
+            padding: 12px 18px 16px;
+        }
+        .tab-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+        }
+        .tab-title {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .tab-url {
+            font-size: 0.72rem;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            background: #fafafa;
+            color: #333;
+            outline: none;
+            cursor: pointer;
+        }
+        .form-group select:focus {
+            border-color: #667eea;
+        }
+        .popup-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .popup-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        .popup-btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: translateY(-1px);
+        }
+        .popup-btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+            margin-top: 8px;
+        }
+        .popup-btn-secondary:hover {
+            background: #e5e5e5;
+        }
+        .popup-disabled {
+            background: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+        }
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            z-index: 999;
+            animation: toastFade 1.5s ease forwards;
+        }
+        @keyframes toastFade {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            75% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-header">
+        <h2>🔖 <span data-i18n="appName">个人书签导航</span></h2>
+    </div>
+    <div class="popup-body">
+        <div class="tab-info">
+            <div class="tab-title" id="tabTitle">...</div>
+            <div class="tab-url" id="tabUrl">...</div>
+        </div>
+        <div class="form-group">
+            <label data-i18n="labelCategory">分类</label>
+            <select id="categorySelect"></select>
+        </div>
+        <button class="popup-btn popup-btn-primary" id="addTabBtn" data-i18n="addCurrentPage">添加当前页</button>
+        <button class="popup-btn popup-btn-secondary" id="openNewTabBtn" data-i18n="openBookmarkNav">打开书签导航</button>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

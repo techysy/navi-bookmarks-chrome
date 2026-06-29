@@ -99,7 +99,20 @@ function initLangSelector() {
     select.addEventListener('change', function() {
         saveLanguagePreference(this.value);
         applyI18n();
+        refreshDynamicContent();
     });
+}
+
+function refreshDynamicContent() {
+    var engineInfo = searchEngines[currentSearchEngine];
+    document.getElementById('currentEngineIcon').textContent = engineInfo.icon;
+    document.getElementById('currentEngineName').textContent = engineInfo.nameKey ? i18n(engineInfo.nameKey) : engineInfo.name;
+    renderCategories();
+    renderBookmarks();
+    var catList = document.getElementById('categoryList');
+    if (catList && catList.innerHTML) {
+        renderCategoryList();
+    }
 }
 
 function categoryLabel(cat) {
@@ -622,6 +635,30 @@ function openAddModalWithCategory(category) {
     document.getElementById('categoryInput').value = category;
     document.getElementById('newCategoryGroup').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('active');
+}
+
+async function openAddModalWithCurrentTab() {
+    var tab = null;
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+        try {
+            var tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tabs && tabs.length > 0) tab = tabs[0];
+        } catch (e) {}
+    }
+    if (!tab || !tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+        showAlert(i18n('alertNoTab'));
+        return;
+    }
+    clearFormDirtyFlag();
+    document.getElementById('modalTitle').textContent = i18n('modalAddBookmark');
+    document.getElementById('editId').value = '';
+    document.getElementById('nameInput').value = tab.title || '';
+    document.getElementById('urlInput').value = tab.url || '';
+    document.getElementById('descriptionInput').value = '';
+    document.getElementById('categoryInput').value = currentCategory === '全部' ? '常用' : currentCategory;
+    document.getElementById('newCategoryGroup').style.display = 'none';
+    document.getElementById('modalOverlay').classList.add('active');
+    document.getElementById('fabMenu').classList.remove('active');
 }
 
 function openEditModal(id) {
@@ -1264,6 +1301,32 @@ async function init() {
     setupBookmarkEvents();
     setupCategoryModalEvents();
     loadBackgroundImage();
+    await checkPendingAddTab();
+}
+
+async function checkPendingAddTab() {
+    var PENDING_TAB_KEY = 'pendingAddTab';
+    var pendingData = null;
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+        var result = await new Promise(function(resolve) {
+            chrome.storage.local.get(PENDING_TAB_KEY, resolve);
+        });
+        pendingData = result[PENDING_TAB_KEY];
+        if (pendingData) {
+            chrome.storage.local.remove(PENDING_TAB_KEY);
+        }
+    }
+    if (pendingData && pendingData.url) {
+        clearFormDirtyFlag();
+        document.getElementById('modalTitle').textContent = i18n('modalAddBookmark');
+        document.getElementById('editId').value = '';
+        document.getElementById('nameInput').value = pendingData.title || '';
+        document.getElementById('urlInput').value = pendingData.url || '';
+        document.getElementById('descriptionInput').value = '';
+        document.getElementById('categoryInput').value = currentCategory === '全部' ? '常用' : currentCategory;
+        document.getElementById('newCategoryGroup').style.display = 'none';
+        document.getElementById('modalOverlay').classList.add('active');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

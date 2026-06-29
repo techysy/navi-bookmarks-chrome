@@ -83,9 +83,13 @@
   "myGithub": { "message": "My GitHub" },
   "juejin": { "message": "Juejin" },
   "bookmarks": { "message": "Bookmarks" },
-  "language": { "message": "🌐 Language" },
+  "language": { "message": "Language" },
   "langSystem": { "message": "System" },
   "langZhCN": { "message": "中文" },
   "langEn": { "message": "English" },
-  "settingsTitle": { "message": "Settings" }
+  "settingsTitle": { "message": "Settings" },
+  "addCurrentPage": { "message": "Add Current Page" },
+  "alertNoTab": { "message": "Unable to get current tab info" },
+  "openBookmarkNav": { "message": "Open Bookmark Navigation" },
+  "popupTitle": { "message": "Bookmark Nav - Add Current Page" }
 }
