@@ -1,26 +1,135 @@
 const STORAGE_KEY = 'bookmarks';
 const CATEGORY_STORAGE_KEY = 'categoryOrder';
 const BG_STORAGE_KEY = 'backgroundStyle';
+const LANG_STORAGE_KEY = 'languagePreference';
 
 const CONFIG = {
     enableImportExport: true
 };
 
+let langPacks = {};
+let currentLangPref = 'system';
+let activeLocale = 'zh_CN';
+
+function i18n(key, substitutions) {
+    if (langPacks[activeLocale] && langPacks[activeLocale][key]) {
+        var msg = langPacks[activeLocale][key].message;
+        if (substitutions) {
+            substitutions.forEach(function(val, idx) {
+                msg = msg.replace('$' + (idx + 1), val);
+            });
+        }
+        return msg;
+    }
+    if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
+        return chrome.i18n.getMessage(key, substitutions);
+    }
+    return '';
+}
+
+function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var msg = i18n(el.dataset.i18n);
+        if (msg) el.textContent = msg;
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+        var msg = i18n(el.dataset.i18nPlaceholder);
+        if (msg) el.placeholder = msg;
+    });
+    var titleEl = document.querySelector('[data-i18n="appName"]');
+    if (titleEl) {
+        var titleMsg = i18n('appName');
+        if (titleMsg) document.title = titleMsg;
+    }
+}
+
+function detectSystemLocale() {
+    var lang = (typeof chrome !== 'undefined' && chrome.i18n) ? chrome.i18n.getUILanguage() : navigator.language;
+    return lang.startsWith('zh') ? 'zh_CN' : 'en';
+}
+
+function loadLangPacks() {
+    return new Promise(function(resolve) {
+        var locales = ['zh_CN', 'en'];
+        var loaded = 0;
+        locales.forEach(function(locale) {
+            var url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+                ? chrome.runtime.getURL('_locales/' + locale + '/messages.json')
+                : '_locales/' + locale + '/messages.json';
+            fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+                langPacks[locale] = data;
+                loaded++;
+                if (loaded === locales.length) resolve();
+            }).catch(function() {
+                loaded++;
+                if (loaded === locales.length) resolve();
+            });
+        });
+    });
+}
+
+function loadLanguagePreference() {
+    return new Promise(function(resolve) {
+        if (typeof chrome !== 'undefined' && chrome.storage) {
+            chrome.storage.local.get(LANG_STORAGE_KEY, function(result) {
+                currentLangPref = result[LANG_STORAGE_KEY] || 'system';
+                resolve();
+            });
+        } else {
+            currentLangPref = localStorage.getItem(LANG_STORAGE_KEY) || 'system';
+            resolve();
+        }
+    });
+}
+
+function saveLanguagePreference(pref) {
+    currentLangPref = pref;
+    activeLocale = pref === 'system' ? detectSystemLocale() : pref;
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+        chrome.storage.local.set({ [LANG_STORAGE_KEY]: pref });
+    } else {
+        localStorage.setItem(LANG_STORAGE_KEY, pref);
+    }
+}
+
+function initLangSelector() {
+    var select = document.getElementById('langSelect');
+    if (!select) return;
+    select.value = currentLangPref;
+    select.addEventListener('change', function() {
+        saveLanguagePreference(this.value);
+        applyI18n();
+    });
+}
+
+function categoryLabel(cat) {
+    var map = {
+        '常用': i18n('catFrequent') || '常用',
+        '开发工具': i18n('catDevTools') || '开发工具',
+        '搜索引擎': i18n('catSearchEngines') || '搜索引擎',
+        '学习资源': i18n('catLearning') || '学习资源',
+        '社区论坛': i18n('catCommunity') || '社区论坛',
+        '其他': i18n('catOther') || '其他',
+        '全部': i18n('catAll') || '全部'
+    };
+    return map[cat] || cat;
+}
+
 const bgPresets = [
-    { id: 'gradient1', label: '紫蓝渐变', css: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-    { id: 'gradient2', label: '日落橙', css: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-    { id: 'gradient3', label: '深海蓝', css: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-    { id: 'gradient4', label: '森林绿', css: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
-    { id: 'gradient5', label: '暗夜紫', css: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
-    { id: 'gradient6', label: '极光', css: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' },
-    { id: 'grassland', label: '若尔盖', css: 'Zoigê.JPG', thumb: 'Zoigê - mini.JPG' }
+    { id: 'gradient1', labelKey: 'bgPresetPurpleBlue', css: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+    { id: 'gradient2', labelKey: 'bgPresetSunset', css: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+    { id: 'gradient3', labelKey: 'bgPresetDeepSea', css: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+    { id: 'gradient4', labelKey: 'bgPresetForest', css: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+    { id: 'gradient5', labelKey: 'bgPresetNightPurple', css: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
+    { id: 'gradient6', labelKey: 'bgPresetAurora', css: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' },
+    { id: 'grassland', labelKey: 'bgPresetZoige', css: 'Zoigê.JPG', thumb: 'Zoigê - mini.JPG' }
 ];
 
 let currentBgStyle = null;
 
 const defaultBookmarks = [
-    { id: 1, name: '我的微博', url: 'https://weibo.com', icon: '📱', category: '常用' },
-    { id: 2, name: '我的GitHub', url: 'https://github.com', icon: '👨‍💻', category: '常用' },
+    { id: 1, nameKey: 'myWeibo', url: 'https://weibo.com', icon: '📱', category: '常用' },
+    { id: 2, nameKey: 'myGithub', url: 'https://github.com', icon: '👨‍💻', category: '常用' },
     { id: 3, name: 'Google', url: 'https://www.google.com', icon: '🔍', category: '搜索引擎' },
     { id: 4, name: 'GitHub', url: 'https://github.com', icon: '💻', category: '开发工具' },
     { id: 5, name: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '❓', category: '社区论坛' },
@@ -28,14 +137,19 @@ const defaultBookmarks = [
     { id: 7, name: 'Vue.js', url: 'https://vuejs.org', icon: '💚', category: '开发工具' },
     { id: 8, name: 'React', url: 'https://react.dev', icon: '⚛️', category: '开发工具' },
     { id: 9, name: 'TypeScript', url: 'https://www.typescriptlang.org', icon: '📘', category: '开发工具' },
-    { id: 10, name: '掘金', url: 'https://juejin.cn', icon: '⛏️', category: '社区论坛' },
+    { id: 10, nameKey: 'juejin', url: 'https://juejin.cn', icon: '⛏️', category: '社区论坛' },
     { id: 11, name: 'SegmentFault', url: 'https://segmentfault.com', icon: '💡', category: '社区论坛' },
     { id: 12, name: 'CSDN', url: 'https://www.csdn.net', icon: '📝', category: '社区论坛' },
     { id: 13, name: 'LeetCode', url: 'https://leetcode.cn', icon: '🧮', category: '学习资源' },
-    { id: 14, name: '百度', url: 'https://www.baidu.com', icon: '🅱️', category: '搜索引擎' },
+    { id: 14, name: 'Baidu', url: 'https://www.baidu.com', icon: '🅱️', category: '搜索引擎' },
     { id: 15, name: 'npm', url: 'https://www.npmjs.com', icon: '📦', category: '开发工具' },
     { id: 16, name: 'Docker', url: 'https://www.docker.com', icon: '🐳', category: '开发工具' }
 ];
+
+function getBookmarkName(bookmark) {
+    if (bookmark.nameKey) return i18n(bookmark.nameKey) || bookmark.nameKey;
+    return bookmark.name || '';
+}
 
 let defaultCategories = ['常用', '开发工具', '搜索引擎', '学习资源', '社区论坛', '其他'];
 let categories = ['全部', ...defaultCategories];
@@ -45,10 +159,10 @@ let draggedItem = null;
 let currentSearchEngine = 'bookmarks';
 
 const searchEngines = {
-    bookmarks: { name: '书签', icon: '⭐', url: '' },
+    bookmarks: { nameKey: 'bookmarks', icon: '⭐', url: '' },
     google: { name: 'Google', icon: '🔍', url: 'https://www.google.com/search?q=' },
-    baidu: { name: '百度', icon: '🔍', url: 'https://www.baidu.com/s?wd=' },
-    bing: { name: '必应', icon: '🅱️', url: 'https://www.bing.com/search?q=' },
+    baidu: { nameKey: 'baidu', icon: '🔍', url: 'https://www.baidu.com/s?wd=' },
+    bing: { nameKey: 'bing', icon: '🅱️', url: 'https://www.bing.com/search?q=' },
     duckduckgo: { name: 'DuckDuckGo', icon: '🦆', url: 'https://duckduckgo.com/?q=' }
 };
 
@@ -67,7 +181,7 @@ function showAlert(message) {
         bubble.innerHTML =
             '<div class="bubble-message">' + message + '</div>' +
             '<div class="bubble-btn-group">' +
-            '<button class="bubble-btn bubble-btn-ok">确定</button>' +
+            '<button class="bubble-btn bubble-btn-ok">' + i18n('btnOk') + '</button>' +
             '</div>';
         overlay.appendChild(bubble);
         bubble.querySelector('.bubble-btn-ok').addEventListener('click', function() {
@@ -89,8 +203,8 @@ function showConfirm(message, danger) {
         bubble.innerHTML =
             '<div class="bubble-message">' + message + '</div>' +
             '<div class="bubble-btn-group">' +
-            '<button class="bubble-btn bubble-btn-cancel">取消</button>' +
-            '<button class="' + confirmClass + '">确定</button>' +
+            '<button class="bubble-btn bubble-btn-cancel">' + i18n('btnCancel') + '</button>' +
+            '<button class="' + confirmClass + '">' + i18n('btnConfirm') + '</button>' +
             '</div>';
         overlay.appendChild(bubble);
         bubble.querySelector('.bubble-btn-cancel').addEventListener('click', function() {
@@ -116,8 +230,8 @@ function showPrompt(message, defaultValue) {
             '<div class="bubble-message">' + message + '</div>' +
             '<input class="bubble-input" type="text" value="' + (defaultValue || '') + '">' +
             '<div class="bubble-btn-group">' +
-            '<button class="bubble-btn bubble-btn-cancel">取消</button>' +
-            '<button class="bubble-btn bubble-btn-confirm">确定</button>' +
+            '<button class="bubble-btn bubble-btn-cancel">' + i18n('btnCancel') + '</button>' +
+            '<button class="bubble-btn bubble-btn-confirm">' + i18n('btnConfirm') + '</button>' +
             '</div>';
         overlay.appendChild(bubble);
         var input = bubble.querySelector('.bubble-input');
@@ -190,6 +304,7 @@ function loadBookmarks() {
                 if (result[STORAGE_KEY]) {
                     bookmarks = result[STORAGE_KEY].map((item, index) => ({
                         ...item,
+                        nameKey: item.nameKey || undefined,
                         order: item.order !== undefined ? item.order : index
                     }));
                     bookmarks.sort((a, b) => a.order - b.order);
@@ -232,7 +347,7 @@ function selectSearchEngine(engine) {
     currentSearchEngine = engine;
     const engineInfo = searchEngines[engine];
     document.getElementById('currentEngineIcon').textContent = engineInfo.icon;
-    document.getElementById('currentEngineName').textContent = engineInfo.name;
+    document.getElementById('currentEngineName').textContent = engineInfo.nameKey ? i18n(engineInfo.nameKey) : engineInfo.name;
     document.querySelectorAll('.search-dropdown-item').forEach(item => {
         item.classList.remove('selected');
     });
@@ -260,16 +375,16 @@ function performSearch(query) {
 
     if (results.length === 0) {
         resultsContainer.innerHTML =
-            '<div class="search-no-results">未找到匹配的书签</div>' +
+            '<div class="search-no-results">' + i18n('noResults') + '</div>' +
             '<div class="search-suggestions">' +
-            '<div class="suggestion-title">在搜索引擎中搜索</div>' +
+            '<div class="suggestion-title">' + i18n('searchInEngines') + '</div>' +
             '<div class="suggestion-item" data-action="search-engine" data-engine="bing" data-query="' + query + '">' +
             '<span class="search-icon">🅱️</span>' +
-            '<span class="text">必应搜索 "' + query + '"</span>' +
+            '<span class="text">' + i18n('bingSearch') + ' "' + query + '"</span>' +
             '</div>' +
             '<div class="suggestion-item" data-action="search-engine" data-engine="baidu" data-query="' + query + '">' +
             '<span class="search-icon">🔍</span>' +
-            '<span class="text">百度搜索 "' + query + '"</span>' +
+            '<span class="text">' + i18n('baiduSearch') + ' "' + query + '"</span>' +
             '</div>' +
             '</div>';
     } else {
@@ -277,7 +392,7 @@ function performSearch(query) {
             return '<div class="search-result-item" data-action="open-bookmark" data-url="' + bookmark.url + '">' +
                 '<div class="icon">' + bookmark.icon + '</div>' +
                 '<div class="info">' +
-                '<div class="name">' + bookmark.name + '</div>' +
+                '<div class="name">' + getBookmarkName(bookmark) + '</div>' +
                 '<div class="url">' + truncateUrl(bookmark.url) + '</div>' +
                 '</div>' +
                 '<span class="category">' + bookmark.category + '</span>' +
@@ -328,8 +443,8 @@ function updateCategorySelect() {
     const currentValue = select.value;
     select.innerHTML = categories
         .filter(function(c) { return c !== '全部'; })
-        .map(function(c) { return '<option value="' + c + '">' + c + '</option>'; })
-        .join('') + '<option value="__new__">+ 添加新分类</option>';
+        .map(function(c) { return '<option value="' + c + '">' + categoryLabel(c) + '</option>'; })
+        .join('') + '<option value="__new__">' + i18n('btnAddNewCategory') + '</option>';
     if (categories.includes(currentValue)) {
         select.value = currentValue;
     }
@@ -338,7 +453,7 @@ function updateCategorySelect() {
 function renderCategories() {
     const filter = document.getElementById('categoryFilter');
     filter.innerHTML = categories.map(function(cat) {
-        return '<button class="category-tag ' + (cat === currentCategory ? 'active' : '') + '" data-category="' + cat + '">' + cat + '</button>';
+        return '<button class="category-tag ' + (cat === currentCategory ? 'active' : '') + '" data-category="' + cat + '">' + categoryLabel(cat) + '</button>';
     }).join('');
 }
 
@@ -352,7 +467,7 @@ function renderBookmarks() {
     const content = document.getElementById('bookmarkContent');
 
     if (bookmarks.length === 0) {
-        content.innerHTML = '<div class="empty-state"><h3>暂无书签</h3><p>点击上方按钮添加您的第一个书签</p></div>';
+        content.innerHTML = '<div class="empty-state"><h3>' + i18n('emptyStateTitle') + '</h3><p>' + i18n('emptyStateDesc') + '</p></div>';
         return;
     }
 
@@ -384,25 +499,25 @@ function renderBookmarks() {
     content.innerHTML = displayCategories.map(function(category) {
         const items = grouped[category] || [];
         return '<div class="bookmark-section">' +
-            '<div class="section-header"><h2>' + category + '</h2><span class="count">' + items.length + '</span></div>' +
+            '<div class="section-header"><h2>' + categoryLabel(category) + '</h2><span class="count">' + items.length + '</span></div>' +
             '<div class="bookmark-grid">' +
             (items.length > 0 ? items.map(function(bookmark) {
                 return '<div class="bookmark-card" draggable="true" data-id="' + bookmark.id + '">' +
                     '<div class="card-click-area" data-action="open-bookmark" data-url="' + bookmark.url + '">' +
                     '<div class="icon">' + bookmark.icon + '</div>' +
-                    '<h3>' + bookmark.name + '</h3>' +
+                    '<h3>' + getBookmarkName(bookmark) + '</h3>' +
                     '</div>' +
                     '<p>' + truncateUrl(bookmark.url) + '</p>' +
                     (bookmark.description ? '<p class="description">' + bookmark.description + '</p>' : '') +
-                    '<span class="category-badge">' + bookmark.category + '</span>' +
+                    '<span class="category-badge">' + categoryLabel(bookmark.category) + '</span>' +
                     '<div class="actions">' +
-                    '<button class="edit-btn" data-action="edit" data-id="' + bookmark.id + '">编辑</button>' +
-                    '<button class="delete-btn" data-action="delete" data-id="' + bookmark.id + '">删除</button>' +
+                    '<button class="edit-btn" data-action="edit" data-id="' + bookmark.id + '">' + i18n('btnEdit') + '</button>' +
+                    '<button class="delete-btn" data-action="delete" data-id="' + bookmark.id + '">' + i18n('btnDelete') + '</button>' +
                     '</div>' +
                     '</div>';
             }).join('') :
             '<div class="bookmark-card add-card" data-action="add-with-category" data-category="' + category + '">' +
-            '<div class="add-icon">+</div><h3>添加书签</h3><p>点击添加新书签</p></div>') +
+            '<div class="add-icon">+</div><h3>' + i18n('addCardTitle') + '</h3><p>' + i18n('addCardDesc') + '</p></div>') +
             '</div></div>';
     }).join('');
 }
@@ -487,7 +602,7 @@ function hasUnsavedChanges() { return formDirty; }
 
 function openAddModal() {
     clearFormDirtyFlag();
-    document.getElementById('modalTitle').textContent = '添加书签';
+    document.getElementById('modalTitle').textContent = i18n('modalAddBookmark');
     document.getElementById('editId').value = '';
     document.getElementById('nameInput').value = '';
     document.getElementById('urlInput').value = '';
@@ -499,7 +614,7 @@ function openAddModal() {
 
 function openAddModalWithCategory(category) {
     clearFormDirtyFlag();
-    document.getElementById('modalTitle').textContent = '添加书签';
+    document.getElementById('modalTitle').textContent = i18n('modalAddBookmark');
     document.getElementById('editId').value = '';
     document.getElementById('nameInput').value = '';
     document.getElementById('urlInput').value = '';
@@ -513,7 +628,7 @@ function openEditModal(id) {
     clearFormDirtyFlag();
     const bookmark = bookmarks.find(function(b) { return b.id === id; });
     if (bookmark) {
-        document.getElementById('modalTitle').textContent = '编辑书签';
+        document.getElementById('modalTitle').textContent = i18n('modalEditBookmark');
         document.getElementById('editId').value = id;
         document.getElementById('nameInput').value = bookmark.name;
         document.getElementById('urlInput').value = bookmark.url;
@@ -526,7 +641,7 @@ function openEditModal(id) {
 
 async function closeModal(force) {
     if (!force && hasUnsavedChanges()) {
-        if (!await showConfirm('您有未保存的更改，确定要退出吗？')) return;
+        if (!await showConfirm(i18n('confirmUnsavedChanges'))) return;
     }
     document.getElementById('modalOverlay').classList.remove('active');
     clearFormDirtyFlag();
@@ -540,7 +655,7 @@ function saveBookmark() {
     let category = document.getElementById('categoryInput').value;
 
     if (!name || !url) {
-        showAlert('请填写完整信息');
+        showAlert(i18n('alertFillComplete'));
         return;
     }
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -549,7 +664,7 @@ function saveBookmark() {
     if (category === '__new__') {
         const newCategory = document.getElementById('newCategoryInput').value.trim();
         if (!newCategory) {
-            showAlert('请输入新分类名称');
+            showAlert(i18n('alertEnterNewCategoryName'));
             return;
         }
         category = newCategory;
@@ -574,7 +689,7 @@ function saveBookmark() {
 }
 
 async function deleteBookmark(id) {
-    if (await showConfirm('确定要删除这个书签吗？', true)) {
+    if (await showConfirm(i18n('confirmDeleteBookmark'), true)) {
         bookmarks = bookmarks.filter(function(b) { return b.id !== id; });
         bookmarks.forEach(function(bookmark, index) { bookmark.order = index; });
         saveBookmarks();
@@ -612,10 +727,10 @@ function renderCategoryList() {
         const count = bookmarks.filter(function(b) { return b.category === cat; }).length;
         const isDefault = defaultCats.includes(cat);
         return '<div class="category-item" draggable="true" data-category="' + cat + '">' +
-            '<div><span class="category-name">📁 ' + cat + '</span><span class="category-count">(' + count + '个书签)</span></div>' +
+            '<div><span class="category-name">📁 ' + categoryLabel(cat) + '</span><span class="category-count">(' + i18n('bookmarksCount', [String(count)]) + ')</span></div>' +
             '<div class="category-actions">' +
-            '<button class="category-btn rename" data-action="rename-category" data-category="' + cat + '">重命名</button>' +
-            (!isDefault ? '<button class="category-btn delete" data-action="delete-category" data-category="' + cat + '">删除</button>' : '<button class="category-btn disabled" disabled>默认</button>') +
+            '<button class="category-btn rename" data-action="rename-category" data-category="' + cat + '">' + i18n('btnRename') + '</button>' +
+            (!isDefault ? '<button class="category-btn delete" data-action="delete-category" data-category="' + cat + '">' + i18n('btnDelete') + '</button>' : '<button class="category-btn disabled" disabled>' + i18n('btnDefault') + '</button>') +
             '</div></div>';
     }).join('');
 }
@@ -700,8 +815,8 @@ function setupCategoryModalEvents() {
 
 async function addCategory() {
     const name = document.getElementById('newCatName').value.trim();
-    if (!name) { showAlert('请输入分类名称'); return; }
-    if (bookmarks.some(function(b) { return b.category === name; })) { showAlert('该分类已存在'); return; }
+    if (!name) { showAlert(i18n('alertEnterCategoryName')); return; }
+    if (bookmarks.some(function(b) { return b.category === name; })) { showAlert(i18n('alertCategoryExists')); return; }
     bookmarks.push({
         id: bookmarks.length > 0 ? Math.max(...bookmarks.map(function(b) { return b.id; })) + 1 : 1,
         name: name, url: '#', icon: '📁', category: name, order: bookmarks.length
@@ -713,9 +828,9 @@ async function addCategory() {
 }
 
 async function renameCategory(oldName) {
-    const newName = await showPrompt('请输入新的分类名称:', oldName);
+    const newName = await showPrompt(i18n('promptNewCategoryName'), oldName);
     if (!newName || newName.trim() === '') return;
-    if (bookmarks.some(function(b) { return b.category === newName.trim(); })) { showAlert('该分类已存在'); return; }
+    if (bookmarks.some(function(b) { return b.category === newName.trim(); })) { showAlert(i18n('alertCategoryExists')); return; }
     bookmarks = bookmarks.map(function(b) {
         return b.category === oldName ? Object.assign({}, b, { category: newName.trim() }) : b;
     });
@@ -728,7 +843,7 @@ async function renameCategory(oldName) {
 }
 
 async function deleteCategory(name) {
-    if (await showConfirm('确定要删除分类 "' + name + '" 吗？该分类下的所有书签将被移到"其他"分类。', true)) {
+    if (await showConfirm(i18n('confirmDeleteCategory', [name]), true)) {
         bookmarks = bookmarks.map(function(b) {
             return b.category === name ? Object.assign({}, b, { category: '其他' }) : b;
         });
@@ -777,10 +892,10 @@ async function handleImportFile(e) {
     try {
         const text = await file.text();
         const importedData = JSON.parse(text);
-        if (!Array.isArray(importedData)) { showAlert('无效的书签数据格式'); return; }
-        if (importedData.length === 0) { showAlert('导入的书签数据为空'); return; }
-        const importMode = await showPrompt('检测到 ' + importedData.length + ' 个书签，选择导入方式：\n1 - 追加到现有书签\n2 - 替换所有书签');
-        if (importMode !== '1' && importMode !== '2') { showAlert('取消导入'); return; }
+        if (!Array.isArray(importedData)) { showAlert(i18n('alertInvalidFormat')); return; }
+        if (importedData.length === 0) { showAlert(i18n('alertImportEmpty')); return; }
+        const importMode = await showPrompt(i18n('promptImportMode', [String(importedData.length)]));
+        if (importMode !== '1' && importMode !== '2') { showAlert(i18n('alertImportCancelled')); return; }
         let maxId = Math.max(...bookmarks.map(function(b) { return b.id; }), 0);
         if (importMode === '2') { bookmarks = []; maxId = 0; }
         const existingCategories = [...new Set(bookmarks.map(function(b) { return b.category; }))];
@@ -799,11 +914,11 @@ async function handleImportFile(e) {
         saveBookmarks();
         updateCategories();
         renderBookmarks();
-        let message = '成功导入 ' + importedData.length + ' 个书签！';
-        if (newCategories.size > 0) message += '<br><br>新增分类：' + [...newCategories].join('、');
+        let message = i18n('alertImportSuccess', [String(importedData.length)]);
+        if (newCategories.size > 0) message += '<br><br>' + i18n('labelNewCategories') + [...newCategories].join('、');
         showAlert(message);
     } catch (error) {
-        showAlert('导入失败：无效的JSON文件');
+        showAlert(i18n('alertImportFailed'));
     }
     e.target.value = '';
 }
@@ -873,7 +988,7 @@ function showBgPicker() {
     panel.style.cssText = 'background:white;border-radius:16px;padding:28px 28px 20px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.25);animation:bubblePop 0.125s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
 
     var title = document.createElement('h3');
-    title.textContent = '🎨 选择背景';
+    title.textContent = i18n('chooseBackground');
     title.style.cssText = 'margin:0 0 16px 0;color:#333;font-size:1.1rem;';
     panel.appendChild(title);
 
@@ -898,7 +1013,7 @@ function showBgPicker() {
         item.appendChild(preview);
 
         var label = document.createElement('div');
-        label.textContent = preset.label;
+        label.textContent = i18n(preset.labelKey);
         label.style.cssText = 'text-align:center;font-size:0.7rem;color:#666;padding:4px 0;';
         item.appendChild(label);
 
@@ -919,7 +1034,7 @@ function showBgPicker() {
     fileRow.style.cssText = 'border-top:1px solid #eee;padding-top:12px;';
 
     var fileBtn = document.createElement('button');
-    fileBtn.textContent = '📁 上传自定义背景';
+    fileBtn.textContent = i18n('uploadCustomBackground');
     fileBtn.style.cssText = 'width:100%;padding:10px;border:2px dashed #ccc;border-radius:10px;background:transparent;color:#666;font-size:0.85rem;cursor:pointer;transition:all 0.2s;';
     fileBtn.addEventListener('mouseenter', function() { fileBtn.style.borderColor = '#667eea'; fileBtn.style.color = '#667eea'; });
     fileBtn.addEventListener('mouseleave', function() { fileBtn.style.borderColor = '#ccc'; fileBtn.style.color = '#666'; });
@@ -950,7 +1065,7 @@ function showBgPicker() {
     var closeRow = document.createElement('div');
     closeRow.style.cssText = 'text-align:center;margin-top:12px;';
     var closeBtn = document.createElement('button');
-    closeBtn.textContent = '关闭';
+    closeBtn.textContent = i18n('btnClose');
     closeBtn.style.cssText = 'padding:6px 20px;border:none;border-radius:8px;background:#f0f0f0;color:#666;cursor:pointer;font-size:0.85rem;';
     closeBtn.addEventListener('click', function() { document.getElementById('bgPickerOverlay').remove(); });
     closeRow.appendChild(closeBtn);
@@ -1131,9 +1246,17 @@ function setupStaticEvents() {
 }
 
 async function init() {
+    await loadLangPacks();
+    await loadLanguagePreference();
+    activeLocale = currentLangPref === 'system' ? detectSystemLocale() : currentLangPref;
+    applyI18n();
+    initLangSelector();
     await loadCategoryOrder();
     await loadBookmarks();
     await loadBackgroundPreference();
+    var engineInfo = searchEngines[currentSearchEngine];
+    document.getElementById('currentEngineIcon').textContent = engineInfo.icon;
+    document.getElementById('currentEngineName').textContent = engineInfo.nameKey ? i18n(engineInfo.nameKey) : engineInfo.name;
     updateCategories();
     renderBookmarks();
     setupCategoryScroll();
