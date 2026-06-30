@@ -45,15 +45,23 @@ function applyI18n() {
 
 function detectSystemLocale() {
     var lang = (typeof chrome !== 'undefined' && chrome.i18n) ? chrome.i18n.getUILanguage() : navigator.language;
-    if (lang.startsWith('zh')) return 'zh_CN';
+    if (lang.startsWith('zh')) {
+        if (lang === 'zh-TW' || lang === 'zh-HK' || lang === 'zh-MO') return 'zh_TW';
+        return 'zh_CN';
+    }
     if (lang.startsWith('ja')) return 'ja';
     if (lang.startsWith('ko')) return 'ko';
+    if (lang.startsWith('de')) return 'de';
+    if (lang.startsWith('fr')) return 'fr';
+    if (lang.startsWith('vi')) return 'vi';
+    if (lang.startsWith('th')) return 'th';
+    if (lang.startsWith('ms')) return 'ms';
     return 'en';
 }
 
 function loadLangPacks() {
     return new Promise(function(resolve) {
-        var locales = ['zh_CN', 'en', 'ja', 'ko'];
+        var locales = ['zh_CN', 'zh_TW', 'en', 'ja', 'ko', 'de', 'fr', 'vi', 'th', 'ms'];
         var loaded = 0;
         locales.forEach(function(locale) {
             var url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
