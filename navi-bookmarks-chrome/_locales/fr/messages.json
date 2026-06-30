@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "Ajouter la Page Actuelle" },
   "alertNoTab": { "message": "Impossible d'obtenir les informations de l'onglet actuel" },
   "openBookmarkNav": { "message": "Ouvrir la Navigation des Favoris" },
-  "popupTitle": { "message": "Navigation des Favoris - Ajouter la Page Actuelle" }
+  "popupTitle": { "message": "Navigation des Favoris - Ajouter la Page Actuelle" },
+  "labelSelectIcon": { "message": "Sélectionner l'icône" },
+  "iconPreviewLabel": { "message": "Icône actuelle" },
+  "btnFetchFavicon": { "message": "🌐 Récupérer l'icône du site" },
+  "btnResetIcon": { "message": "🔄 Réinitialiser par défaut" },
+  "iconFavicon": { "message": "Icône du site" },
+  "alertEnterUrlFirst": { "message": "Veuillez d'abord entrer une URL" },
+  "hintUrlEnter": { "message": "💡 Appuyez sur Entrée après avoir saisi l'URL pour récupérer les informations" },
+  "btnAdded": { "message": "Ajouté" },
+  "btnUpdateCategory": { "message": "Mettre à jour la catégorie" },
+  "alertCategoryUpdated": { "message": "✓ Catégorie mise à jour en $1" }
 }

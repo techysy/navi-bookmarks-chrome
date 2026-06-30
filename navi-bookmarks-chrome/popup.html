@@ -131,6 +131,20 @@
         <h2>🔖 <span data-i18n="appName">个人书签导航</span></h2>
     </div>
     <div class="popup-body">
+        <div class="icon-row" style="margin-bottom:14px;">
+            <div style="font-size:0.75rem;color:#888;margin-bottom:6px;" data-i18n="labelSelectIcon">选择图标</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <div class="icon-preview" id="iconPreview" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:20px;color:white;flex-shrink:0;overflow:hidden;">
+                    <span id="iconPreviewText">🌐</span>
+                    <img id="iconPreviewImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">
+                </div>
+                <span style="font-size:0.75rem;color:#888;" data-i18n="iconPreviewLabel">当前图标</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button type="button" id="fetchFaviconBtn" style="flex:1;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;background:#fafafa;color:#555;font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;" data-i18n="btnFetchFavicon">🌐 获取网站图标</button>
+                <button type="button" id="resetIconBtn" style="flex:1;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;background:#fafafa;color:#555;font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;" data-i18n="btnResetIcon">🔄 重置为默认</button>
+            </div>
+        </div>
         <div class="tab-info">
             <div class="tab-title" id="tabTitle">...</div>
             <div class="tab-url" id="tabUrl">...</div>

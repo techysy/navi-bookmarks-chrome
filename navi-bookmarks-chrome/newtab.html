@@ -75,16 +75,38 @@
                 <h2 id="modalTitle" data-i18n="modalAddBookmark">添加书签</h2>
                 <input type="hidden" id="editId">
                 <div class="form-group">
-                    <label for="nameInput" data-i18n="labelWebsiteName">网站名称</label>
-                    <input type="text" id="nameInput" data-i18n-placeholder="placeholderWebsiteName" placeholder="输入网站名称">
+                    <label data-i18n="labelSelectIcon">选择图标</label>
+                    <div class="icon-picker">
+                        <input type="hidden" id="iconTypeInput" value="emoji">
+                        <input type="hidden" id="iconValueInput" value="">
+                        <div class="icon-picker-current">
+                            <div class="icon-preview" id="iconPreview">
+                                <span id="iconPreviewText">🌟</span>
+                                <img id="iconPreviewImg" style="display:none;" alt="">
+                            </div>
+                            <span class="icon-preview-label" data-i18n="iconPreviewLabel">当前图标</span>
+                        </div>
+                        <div class="icon-picker-actions">
+                            <button type="button" class="icon-action-btn" id="fetchFaviconBtn" data-i18n="btnFetchFavicon">🌐 获取网站图标</button>
+                            <button type="button" class="icon-action-btn" id="iconResetBtn" data-i18n="btnResetIcon">🔄 重置为默认</button>
+                        </div>
+                        <div class="icon-emoji-picker" id="emojiPicker" style="display:none;">
+                            <div class="emoji-grid" id="emojiGrid"></div>
+                        </div>
+                        <div class="icon-favicon-list" id="faviconList" style="display:none;"></div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="urlInput" data-i18n="labelWebsiteUrl">网站地址</label>
                     <input type="text" id="urlInput" data-i18n-placeholder="placeholderWebsiteUrl" placeholder="输入网站URL或IP地址（可省略http://）">
+                    <div class="field-hint" data-i18n="hintUrlEnter">💡 输入网址后回车，自动获取相关信息</div>
                 </div>
                 <div class="form-group">
-                    <label for="descriptionInput" data-i18n="labelDescription">描述（可选）</label>
-                    <textarea id="descriptionInput" data-i18n-placeholder="placeholderDescription" placeholder="输入网站描述或备注信息"></textarea>
+                    <label for="nameInput" data-i18n="labelWebsiteName">网站名称</label>
+                    <input type="text" id="nameInput" data-i18n-placeholder="placeholderWebsiteName" placeholder="输入网站名称">
+                </div>
+                <div class="form-group" style="display:none;">
+                    <input type="text" id="descriptionInput">
                 </div>
                 <div class="form-group">
                     <label for="categoryInput" data-i18n="labelCategory">分类</label>

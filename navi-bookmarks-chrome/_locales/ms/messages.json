@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "Tambah Halaman Semasa" },
   "alertNoTab": { "message": "Tidak dapat mendapatkan maklumat tab semasa" },
   "openBookmarkNav": { "message": "Buka Navigasi Tanda Buku" },
-  "popupTitle": { "message": "Navigasi Tanda Buku - Tambah Halaman Semasa" }
+  "popupTitle": { "message": "Navigasi Tanda Buku - Tambah Halaman Semasa" },
+  "labelSelectIcon": { "message": "Pilih Ikon" },
+  "iconPreviewLabel": { "message": "Ikon Semasa" },
+  "btnFetchFavicon": { "message": "🌐 Dapatkan Ikon Laman Web" },
+  "btnResetIcon": { "message": "🔄 Tetapkan Semula ke Lalai" },
+  "iconFavicon": { "message": "Ikon Laman Web" },
+  "alertEnterUrlFirst": { "message": "Sila masukkan URL terlebih dahulu" },
+  "hintUrlEnter": { "message": "💡 Tekan Enter selepas memasuki URL untuk mendapatkan maklumat berkaitan secara automatik" },
+  "btnAdded": { "message": "Ditambah" },
+  "btnUpdateCategory": { "message": "Kemas Kini Kategori" },
+  "alertCategoryUpdated": { "message": "✓ Kategori dikemas kini kepada $1" }
 }

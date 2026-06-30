@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "添加当前页" },
   "alertNoTab": { "message": "无法获取当前标签页信息" },
   "openBookmarkNav": { "message": "打开书签导航" },
-  "popupTitle": { "message": "书签导航 - 添加当前页" }
+  "popupTitle": { "message": "书签导航 - 添加当前页" },
+  "labelSelectIcon": { "message": "选择图标" },
+  "iconPreviewLabel": { "message": "当前图标" },
+  "btnFetchFavicon": { "message": "🌐 获取网站图标" },
+  "btnResetIcon": { "message": "🔄 重置为默认" },
+  "iconFavicon": { "message": "网站图标" },
+  "alertEnterUrlFirst": { "message": "请先输入网址" },
+  "hintUrlEnter": { "message": "💡 输入网址后回车，自动获取相关信息" },
+  "btnAdded": { "message": "已添加" },
+  "btnUpdateCategory": { "message": "更新分类" },
+  "alertCategoryUpdated": { "message": "✓ 分类已更新为 $1" }
 }

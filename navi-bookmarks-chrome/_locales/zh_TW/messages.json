@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "新增目前頁面" },
   "alertNoTab": { "message": "無法取得目前標籤頁資訊" },
   "openBookmarkNav": { "message": "開啟書籤導航" },
-  "popupTitle": { "message": "書籤導航 - 新增目前頁面" }
+  "popupTitle": { "message": "書籤導航 - 新增目前頁面" },
+  "labelSelectIcon": { "message": "選擇圖示" },
+  "iconPreviewLabel": { "message": "目前圖示" },
+  "btnFetchFavicon": { "message": "🌐 取得網站圖示" },
+  "btnResetIcon": { "message": "🔄 重設為預設" },
+  "iconFavicon": { "message": "網站圖示" },
+  "alertEnterUrlFirst": { "message": "請先輸入網址" },
+  "hintUrlEnter": { "message": "💡 輸入網址後按Enter，自動取得相關資訊" },
+  "btnAdded": { "message": "已新增" },
+  "btnUpdateCategory": { "message": "更新分類" },
+  "alertCategoryUpdated": { "message": "✓ 分類已更新為 $1" }
 }

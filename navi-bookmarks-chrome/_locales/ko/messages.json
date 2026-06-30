@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "현재 페이지 추가" },
   "alertNoTab": { "message": "현재 탭 정보를 가져올 수 없습니다" },
   "openBookmarkNav": { "message": "북마크 내비 열기" },
-  "popupTitle": { "message": "북마크 내비 - 현재 페이지 추가" }
+  "popupTitle": { "message": "북마크 내비 - 현재 페이지 추가" },
+  "labelSelectIcon": { "message": "아이콘 선택" },
+  "iconPreviewLabel": { "message": "현재 아이콘" },
+  "btnFetchFavicon": { "message": "🌐 웹사이트 아이콘 가져오기" },
+  "btnResetIcon": { "message": "🔄 기본값으로 초기화" },
+  "iconFavicon": { "message": "웹사이트 아이콘" },
+  "alertEnterUrlFirst": { "message": "먼저 URL을 입력하세요" },
+  "hintUrlEnter": { "message": "💡 URL 입력 후 Enter를 누르면 관련 정보를 자동으로 가져옵니다" },
+  "btnAdded": { "message": "추가됨" },
+  "btnUpdateCategory": { "message": "카테고리 업데이트" },
+  "alertCategoryUpdated": { "message": "✓ 카테고리가 $1(으)로 업데이트되었습니다" }
 }

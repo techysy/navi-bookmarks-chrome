@@ -649,6 +649,13 @@ header p {
     background: white;
 }
 
+.field-hint {
+    font-size: 0.72rem;
+    color: #999;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
 .modal .btn-group {
     display: flex;
     gap: 10px;
@@ -1169,4 +1176,145 @@ header p {
 .bubble-btn-danger:hover {
     box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
     transform: translateY(-1px);
+}
+
+.icon-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.icon-picker-current {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.icon-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.icon-preview-label {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.icon-picker-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-action-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fafafa;
+    color: #555;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.icon-action-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f0f0ff;
+}
+
+.icon-emoji-picker {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 8px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+}
+
+.emoji-item {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.emoji-item:hover {
+    background: rgba(102, 126, 234, 0.15);
+    transform: scale(1.15);
+}
+
+.icon-favicon-list {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.favicon-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.favicon-option:hover {
+    border-color: #667eea;
+    background: #f0f0ff;
+}
+
+.favicon-option img {
+    border-radius: 4px;
+}
+
+.favicon-option span {
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.bookmark-card .icon img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }

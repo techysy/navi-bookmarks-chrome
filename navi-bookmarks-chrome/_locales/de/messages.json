@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "Aktuelle Seite hinzufügen" },
   "alertNoTab": { "message": "Aktuelle Tab-Informationen können nicht abgerufen werden" },
   "openBookmarkNav": { "message": "Lesezeichen-Navigation öffnen" },
-  "popupTitle": { "message": "Lesezeichen-Navigation - Aktuelle Seite hinzufügen" }
+  "popupTitle": { "message": "Lesezeichen-Navigation - Aktuelle Seite hinzufügen" },
+  "labelSelectIcon": { "message": "Symbol auswählen" },
+  "iconPreviewLabel": { "message": "Aktuelles Symbol" },
+  "btnFetchFavicon": { "message": "🌐 Website-Symbol abrufen" },
+  "btnResetIcon": { "message": "🔄 Auf Standard zurücksetzen" },
+  "iconFavicon": { "message": "Website-Symbol" },
+  "alertEnterUrlFirst": { "message": "Bitte zuerst eine URL eingeben" },
+  "hintUrlEnter": { "message": "💡 Drücken Sie Enter nach der URL-Eingabe, um relevante Informationen abzurufen" },
+  "btnAdded": { "message": "Hinzugefügt" },
+  "btnUpdateCategory": { "message": "Kategorie aktualisieren" },
+  "alertCategoryUpdated": { "message": "✓ Kategorie auf $1 aktualisiert" }
 }

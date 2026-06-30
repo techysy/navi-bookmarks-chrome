@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "現在のページを追加" },
   "alertNoTab": { "message": "現在のタブ情報を取得できません" },
   "openBookmarkNav": { "message": "ブックマークナビを開く" },
-  "popupTitle": { "message": "ブックマークナビ - 現在のページを追加" }
+  "popupTitle": { "message": "ブックマークナビ - 現在のページを追加" },
+  "labelSelectIcon": { "message": "アイコンを選択" },
+  "iconPreviewLabel": { "message": "現在のアイコン" },
+  "btnFetchFavicon": { "message": "🌐 ウェブサイトアイコンを取得" },
+  "btnResetIcon": { "message": "🔄 デフォルトにリセット" },
+  "iconFavicon": { "message": "ウェブサイトアイコン" },
+  "alertEnterUrlFirst": { "message": "まずURLを入力してください" },
+  "hintUrlEnter": { "message": "💡 URLを入力後にEnterを押すと、関連情報を自動取得します" },
+  "btnAdded": { "message": "追加済み" },
+  "btnUpdateCategory": { "message": "カテゴリを更新" },
+  "alertCategoryUpdated": { "message": "✓ カテゴリを $1 に更新しました" }
 }

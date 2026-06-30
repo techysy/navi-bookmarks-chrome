@@ -99,5 +99,15 @@
   "addCurrentPage": { "message": "Add Current Page" },
   "alertNoTab": { "message": "Unable to get current tab info" },
   "openBookmarkNav": { "message": "Open Bookmark Navigation" },
-  "popupTitle": { "message": "Bookmark Nav - Add Current Page" }
+  "popupTitle": { "message": "Bookmark Nav - Add Current Page" },
+  "labelSelectIcon": { "message": "Select Icon" },
+  "iconPreviewLabel": { "message": "Current Icon" },
+  "btnFetchFavicon": { "message": "🌐 Fetch Website Icon" },
+  "btnResetIcon": { "message": "🔄 Reset to Default" },
+  "iconFavicon": { "message": "Website Icon" },
+  "alertEnterUrlFirst": { "message": "Please enter a URL first" },
+  "hintUrlEnter": { "message": "💡 Press Enter after entering URL to auto-fetch related info" },
+  "btnAdded": { "message": "Added" },
+  "btnUpdateCategory": { "message": "Update Category" },
+  "alertCategoryUpdated": { "message": "✓ Category updated to $1" }
 }

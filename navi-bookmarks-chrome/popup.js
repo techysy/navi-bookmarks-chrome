@@ -1,10 +1,13 @@
 const STORAGE_KEY = 'bookmarks';
 const CATEGORY_STORAGE_KEY = 'categoryOrder';
 const LANG_STORAGE_KEY = 'languagePreference';
+const ICON_CACHE_KEY = 'popupIconCache';
 const DEFAULT_CATEGORIES = ['常用', '开发工具', '搜索引擎', '学习资源', '社区论坛', '其他'];
 
 let langPacks = {};
 let activeLocale = 'zh_CN';
+let currentIconType = 'emoji';
+let currentIconValue = '🌐';
 
 function i18n(key, substitutions) {
     if (langPacks[activeLocale] && langPacks[activeLocale][key]) {
@@ -142,6 +145,50 @@ function showToast(msg) {
     setTimeout(function() { toast.remove(); }, 1600);
 }
 
+function getFaviconUrl(url) {
+    try {
+        var hostname = new URL(url).hostname;
+        return 'https://www.google.com/s2/favicons?domain=' + hostname + '&sz=64';
+    } catch (e) {
+        return null;
+    }
+}
+
+function fetchFavicon(url, callback) {
+    var faviconUrl = getFaviconUrl(url);
+    if (!faviconUrl) { callback(null); return; }
+    var img = new Image();
+    img.onload = function() { callback(faviconUrl); };
+    img.onerror = function() { callback(null); };
+    img.src = faviconUrl;
+}
+
+function updateIconPreview(imgUrl) {
+    var previewText = document.getElementById('iconPreviewText');
+    var previewImg = document.getElementById('iconPreviewImg');
+    if (imgUrl) {
+        previewText.style.display = 'none';
+        previewImg.style.display = 'block';
+        previewImg.src = imgUrl;
+        currentIconType = 'favicon';
+        currentIconValue = imgUrl;
+    } else {
+        previewImg.style.display = 'none';
+        previewText.style.display = 'block';
+        currentIconType = 'emoji';
+        currentIconValue = '🌐';
+        previewText.textContent = currentIconValue;
+    }
+}
+
+function resetIcon() {
+    currentIconType = 'emoji';
+    currentIconValue = '🌐';
+    document.getElementById('iconPreviewText').textContent = '🌐';
+    document.getElementById('iconPreviewImg').style.display = 'none';
+    document.getElementById('iconPreviewText').style.display = 'block';
+}
+
 async function init() {
     await loadLangPacks();
     var langPref = await loadLanguagePreference();
@@ -170,26 +217,88 @@ async function init() {
     titleEl.textContent = tab.title || '(untitled)';
     urlEl.textContent = tab.url;
 
+    var bookmarks = await loadBookmarks();
+    var existingBookmark = bookmarks.find(function(b) { return b.url === tab.url; });
+    var isAdded = !!existingBookmark;
+
+    if (isAdded) {
+        addBtn.textContent = i18n('btnUpdateCategory') || '更新分类';
+        categorySelect.value = existingBookmark.category || '常用';
+    }
+
+    fetchFavicon(tab.url, function(faviconUrl) {
+        if (faviconUrl) {
+            if (existingBookmark && existingBookmark.iconType === 'favicon' && existingBookmark.iconValue) {
+                updateIconPreview(existingBookmark.iconValue);
+            } else {
+                updateIconPreview(faviconUrl);
+            }
+        }
+    });
+
+    var pageDescription = '';
+    fetch(tab.url).then(function(r) { return r.text(); }).then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var meta = doc.querySelector('meta[name="description"]') || doc.querySelector('meta[property="og:description"]');
+        if (meta) {
+            var desc = meta.getAttribute('content');
+            if (desc && desc.trim()) {
+                pageDescription = desc.trim();
+            }
+        }
+    }).catch(function() {});
+
+    document.getElementById('resetIconBtn').addEventListener('click', function() {
+        resetIcon();
+    });
+
+    document.getElementById('fetchFaviconBtn').addEventListener('click', function() {
+        if (!tab || !tab.url) return;
+        fetchFavicon(tab.url, function(faviconUrl) {
+            if (faviconUrl) {
+                updateIconPreview(faviconUrl);
+            }
+        });
+    });
+
     addBtn.addEventListener('click', async function() {
         if (addBtn.disabled) return;
         var category = categorySelect.value;
-        var bookmarks = await loadBookmarks();
+
+        if (isAdded) {
+            bookmarks = bookmarks.map(function(b) {
+                if (b.url === tab.url) {
+                    return Object.assign({}, b, { category: category });
+                }
+                return b;
+            });
+            saveBookmarks(bookmarks);
+            showToast(i18n('alertCategoryUpdated') ? i18n('alertCategoryUpdated').replace('$1', category) : '✓ 分类已更新为 ' + category);
+            setTimeout(function() { window.close(); }, 800);
+            return;
+        }
+
         var maxId = bookmarks.length > 0 ? Math.max.apply(null, bookmarks.map(function(b) { return b.id; })) : 0;
         var icons = ['🌟', '⭐', '🔥', '💎', '🎯', '🎨', '🚀', '💡', '⚡', '🌈'];
         var randomIcon = icons[Math.floor(Math.random() * icons.length)];
+        var bookmarkIcon = currentIconType === 'favicon' && currentIconValue ? currentIconValue : randomIcon;
         bookmarks.push({
             id: maxId + 1,
             name: tab.title || '',
             url: tab.url,
-            icon: randomIcon,
+            icon: bookmarkIcon,
+            iconType: currentIconType,
+            iconValue: currentIconValue,
+            description: pageDescription,
             category: category,
             order: bookmarks.length
         });
         saveBookmarks(bookmarks);
         showToast(i18n('alertImportSuccess') ? i18n('alertImportSuccess').replace('$1', '1') : '✓ 已添加');
         addBtn.disabled = true;
-        addBtn.classList.add('popup-disabled');
-        addBtn.textContent = '✓';
+        addBtn.textContent = i18n('btnAdded') || '已添加';
+        isAdded = true;
+        existingBookmark = bookmarks[bookmarks.length - 1];
         setTimeout(function() { window.close(); }, 800);
     });
 

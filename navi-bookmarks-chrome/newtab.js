@@ -526,9 +526,10 @@ function renderBookmarks() {
             '<div class="section-header"><h2>' + categoryLabel(category) + '</h2><span class="count">' + items.length + '</span></div>' +
             '<div class="bookmark-grid">' +
             (items.length > 0 ? items.map(function(bookmark) {
+                var iconHtml = renderBookmarkIcon(bookmark);
                 return '<div class="bookmark-card" draggable="true" data-id="' + bookmark.id + '">' +
                     '<div class="card-click-area" data-action="open-bookmark" data-url="' + bookmark.url + '">' +
-                    '<div class="icon">' + bookmark.icon + '</div>' +
+                    '<div class="icon">' + iconHtml + '</div>' +
                     '<h3>' + getBookmarkName(bookmark) + '</h3>' +
                     '</div>' +
                     '<p>' + truncateUrl(bookmark.url) + '</p>' +
@@ -633,6 +634,8 @@ function openAddModal() {
     document.getElementById('descriptionInput').value = '';
     document.getElementById('categoryInput').value = currentCategory === '全部' ? '常用' : currentCategory;
     document.getElementById('newCategoryGroup').style.display = 'none';
+    resetIcon();
+    document.getElementById('faviconList').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('active');
 }
 
@@ -645,6 +648,8 @@ function openAddModalWithCategory(category) {
     document.getElementById('descriptionInput').value = '';
     document.getElementById('categoryInput').value = category;
     document.getElementById('newCategoryGroup').style.display = 'none';
+    resetIcon();
+    document.getElementById('faviconList').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('active');
 }
 
@@ -668,6 +673,8 @@ async function openAddModalWithCurrentTab() {
     document.getElementById('descriptionInput').value = '';
     document.getElementById('categoryInput').value = currentCategory === '全部' ? '常用' : currentCategory;
     document.getElementById('newCategoryGroup').style.display = 'none';
+    resetIcon();
+    document.getElementById('faviconList').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('active');
     document.getElementById('fabMenu').classList.remove('active');
 }
@@ -678,11 +685,25 @@ function openEditModal(id) {
     if (bookmark) {
         document.getElementById('modalTitle').textContent = i18n('modalEditBookmark');
         document.getElementById('editId').value = id;
-        document.getElementById('nameInput').value = bookmark.name;
+        document.getElementById('nameInput').value = getBookmarkName(bookmark);
         document.getElementById('urlInput').value = bookmark.url;
         document.getElementById('descriptionInput').value = bookmark.description || '';
         document.getElementById('categoryInput').value = bookmark.category;
         document.getElementById('newCategoryGroup').style.display = 'none';
+        currentIconType = bookmark.iconType || 'emoji';
+        currentIconValue = bookmark.iconValue || bookmark.icon || '🌟';
+        document.getElementById('iconTypeInput').value = currentIconType;
+        document.getElementById('iconValueInput').value = currentIconValue;
+        if (currentIconType === 'favicon' && currentIconValue) {
+            document.getElementById('iconPreviewText').style.display = 'none';
+            document.getElementById('iconPreviewImg').style.display = 'block';
+            document.getElementById('iconPreviewImg').src = currentIconValue;
+        } else {
+            document.getElementById('iconPreviewImg').style.display = 'none';
+            document.getElementById('iconPreviewText').style.display = 'block';
+            document.getElementById('iconPreviewText').textContent = currentIconValue;
+        }
+        document.getElementById('faviconList').style.display = 'none';
         document.getElementById('modalOverlay').classList.add('active');
     }
 }
@@ -701,6 +722,8 @@ function saveBookmark() {
     let url = document.getElementById('urlInput').value.trim();
     const description = document.getElementById('descriptionInput').value.trim();
     let category = document.getElementById('categoryInput').value;
+    const iconType = document.getElementById('iconTypeInput').value || 'emoji';
+    const iconValue = document.getElementById('iconValueInput').value || '';
 
     if (!name || !url) {
         showAlert(i18n('alertFillComplete'));
@@ -721,13 +744,24 @@ function saveBookmark() {
     const icons = ['🌟', '⭐', '🔥', '💎', '🎯', '🎨', '🚀', '💡', '🎯', '⚡', '🌈', '🎪', '🎭', '🎬', '🎨'];
     const randomIcon = icons[Math.floor(Math.random() * icons.length)];
 
+    var bookmarkIcon = iconType === 'favicon' && iconValue ? iconValue : (iconValue || randomIcon);
+    var bookmarkIconType = iconType;
+    var bookmarkIconValue = iconValue || randomIcon;
+
     if (id) {
         bookmarks = bookmarks.map(function(b) {
-            return b.id === parseInt(id) ? Object.assign({}, b, { name: name, url: url, description: description, category: category }) : b;
+            return b.id === parseInt(id) ? Object.assign({}, b, {
+                name: name, url: url, description: description, category: category,
+                iconType: bookmarkIconType, iconValue: bookmarkIconValue, icon: bookmarkIcon
+            }) : b;
         });
     } else {
         const newId = bookmarks.length > 0 ? Math.max(...bookmarks.map(function(b) { return b.id; })) + 1 : 1;
-        bookmarks.push({ id: newId, name: name, url: url, icon: randomIcon, category: category, order: bookmarks.length });
+        bookmarks.push({
+            id: newId, name: name, url: url, icon: bookmarkIcon,
+            iconType: bookmarkIconType, iconValue: bookmarkIconValue,
+            category: category, order: bookmarks.length
+        });
     }
 
     saveBookmarks();
@@ -1156,6 +1190,185 @@ function setupCategoryScroll() {
     bookmarkContent.addEventListener('wheel', handleWheel);
 }
 
+const defaultEmojiIcons = ['🌟', '⭐', '🔥', '💎', '🎯', '🎨', '🚀', '💡', '⚡', '🌈', '🎪', '🎭', '🎬', '📱', '💻', '🔧', '📦', '🎓', '📖', '🎵'];
+
+const emojiList = [
+    '🌟', '⭐', '🔥', '💎', '🎯', '🎨', '🚀', '💡', '⚡', '🌈',
+    '📱', '💻', '🔧', '📦', '🎓', '📖', '🎵', '🎬', '🎪', '🎭',
+    '🔍', '🅰️', '🔷', '🦆', '❓', '📝', '🧮', '⛏️', '💡', '✅',
+    '🌍', '🔗', '📬', '🔔', '⚙️', '🏠', '🔑', '🎁', '🎮', '🏆',
+    '📊', '📈', '🗂️', '🗓️', '🧪', '🔬', '🖥️', '📡', '🔌', '💾'
+];
+
+let currentIconType = 'emoji';
+let currentIconValue = '';
+
+function getFaviconUrl(url) {
+    try {
+        var hostname = new URL(url).hostname;
+        var parts = hostname.split('.');
+        var rootDomain = parts.length > 2 ? parts.slice(-2).join('.') : hostname;
+        return 'https://www.google.com/s2/favicons?domain=' + rootDomain + '&sz=64';
+    } catch (e) {
+        return null;
+    }
+}
+
+function fetchFaviconFromUrl(url) {
+    var faviconUrl = getFaviconUrl(url);
+    if (!faviconUrl) return;
+    var img = new Image();
+    img.onload = function() {
+        updateIconPreview(faviconUrl);
+        showFaviconOptions(faviconUrl);
+    };
+    img.onerror = function() {
+        updateIconPreview(null);
+    };
+    img.src = faviconUrl;
+}
+
+function fetchWebsiteDescription(url) {
+    fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var title = doc.querySelector('title');
+        if (title && title.textContent.trim()) {
+            var nameInput = document.getElementById('nameInput');
+            if (!nameInput.value.trim()) {
+                nameInput.value = title.textContent.trim();
+            }
+        }
+        var meta = doc.querySelector('meta[name="description"]') || doc.querySelector('meta[property="og:description"]');
+        if (meta) {
+            var desc = meta.getAttribute('content');
+            if (desc && desc.trim()) {
+                document.getElementById('descriptionInput').value = desc.trim();
+            }
+        }
+    }).catch(function() {});
+}
+
+function updateIconPreview(imgUrl) {
+    var previewText = document.getElementById('iconPreviewText');
+    var previewImg = document.getElementById('iconPreviewImg');
+    var typeInput = document.getElementById('iconTypeInput');
+    var valueInput = document.getElementById('iconValueInput');
+
+    if (imgUrl) {
+        previewText.style.display = 'none';
+        previewImg.style.display = 'block';
+        previewImg.src = imgUrl;
+        currentIconType = 'favicon';
+        currentIconValue = imgUrl;
+    } else {
+        previewImg.style.display = 'none';
+        previewText.style.display = 'block';
+        currentIconType = 'emoji';
+        currentIconValue = currentIconValue || '🌟';
+        previewText.textContent = currentIconValue;
+    }
+    typeInput.value = currentIconType;
+    valueInput.value = currentIconValue;
+}
+
+function showFaviconOptions(faviconUrl) {
+    var list = document.getElementById('faviconList');
+    list.innerHTML = '';
+    list.style.display = 'block';
+    var item = document.createElement('div');
+    item.className = 'favicon-option';
+    item.innerHTML = '<img src="' + faviconUrl + '" width="32" height="32"><span>' + i18n('iconFavicon') + '</span>';
+    item.addEventListener('click', function() {
+        updateIconPreview(faviconUrl);
+        list.style.display = 'none';
+    });
+    list.appendChild(item);
+}
+
+function resetIcon() {
+    var defaultIcon = defaultEmojiIcons[Math.floor(Math.random() * defaultEmojiIcons.length)];
+    currentIconType = 'emoji';
+    currentIconValue = defaultIcon;
+    document.getElementById('iconTypeInput').value = 'emoji';
+    document.getElementById('iconValueInput').value = defaultIcon;
+    document.getElementById('iconPreviewText').textContent = defaultIcon;
+    document.getElementById('iconPreviewImg').style.display = 'none';
+    document.getElementById('iconPreviewText').style.display = 'block';
+    document.getElementById('faviconList').style.display = 'none';
+}
+
+function initEmojiPicker() {
+    var grid = document.getElementById('emojiGrid');
+    if (grid.children.length > 0) return;
+    emojiList.forEach(function(emoji) {
+        var item = document.createElement('span');
+        item.className = 'emoji-item';
+        item.textContent = emoji;
+        item.addEventListener('click', function() {
+            currentIconType = 'emoji';
+            currentIconValue = emoji;
+            document.getElementById('iconTypeInput').value = 'emoji';
+            document.getElementById('iconValueInput').value = emoji;
+            document.getElementById('iconPreviewText').textContent = emoji;
+            document.getElementById('iconPreviewImg').style.display = 'none';
+            document.getElementById('iconPreviewText').style.display = 'block';
+            document.getElementById('faviconList').style.display = 'none';
+        });
+        grid.appendChild(item);
+    });
+}
+
+function setupIconPicker() {
+    document.getElementById('fetchFaviconBtn').addEventListener('click', function() {
+        var url = document.getElementById('urlInput').value.trim();
+        if (!url) {
+            showAlert(i18n('alertEnterUrlFirst'));
+            return;
+        }
+        fetchFaviconFromUrl(url);
+    });
+
+    document.getElementById('iconResetBtn').addEventListener('click', function() {
+        resetIcon();
+    });
+
+    document.getElementById('urlInput').addEventListener('blur', function() {
+        var url = this.value.trim();
+        if (!url) return;
+        if (document.getElementById('iconTypeInput').value === 'emoji') {
+            fetchFaviconFromUrl(url);
+        }
+        var descInput = document.getElementById('descriptionInput');
+        if (!descInput.value.trim()) {
+            fetchWebsiteDescription(url);
+        }
+    });
+
+    document.getElementById('urlInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            var url = this.value.trim();
+            if (!url) return;
+            if (document.getElementById('iconTypeInput').value === 'emoji') {
+                fetchFaviconFromUrl(url);
+            }
+            var descInput = document.getElementById('descriptionInput');
+            if (!descInput.value.trim()) {
+                fetchWebsiteDescription(url);
+            }
+            this.blur();
+        }
+    });
+
+    initEmojiPicker();
+}
+
+function renderBookmarkIcon(bookmark) {
+    if (bookmark.iconType === 'favicon' && bookmark.iconValue) {
+        return '<img src="' + bookmark.iconValue + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'' + (bookmark.icon || '🔗') + '\';">';
+    }
+    return bookmark.icon || '🔗';
+}
+
 function setupStaticEvents() {
     document.getElementById('searchForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1311,6 +1524,7 @@ async function init() {
     setupStaticEvents();
     setupBookmarkEvents();
     setupCategoryModalEvents();
+    setupIconPicker();
     loadBackgroundImage();
     await checkPendingAddTab();
 }
@@ -1336,6 +1550,8 @@ async function checkPendingAddTab() {
         document.getElementById('descriptionInput').value = '';
         document.getElementById('categoryInput').value = currentCategory === '全部' ? '常用' : currentCategory;
         document.getElementById('newCategoryGroup').style.display = 'none';
+        resetIcon();
+        document.getElementById('faviconList').style.display = 'none';
         document.getElementById('modalOverlay').classList.add('active');
     }
 }
