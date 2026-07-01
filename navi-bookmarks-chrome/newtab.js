@@ -533,7 +533,7 @@ function renderBookmarks() {
                     '<h3>' + getBookmarkName(bookmark) + '</h3>' +
                     '</div>' +
                     '<p>' + truncateUrl(bookmark.url) + '</p>' +
-                    (bookmark.description ? '<p class="description">' + bookmark.description + '</p>' : '') +
+                    (bookmark.description ? '<p class="description" data-action="edit" data-id="' + bookmark.id + '" title="' + i18n('btnEdit') + '">' + bookmark.description + '</p>' : '') +
                     '<span class="category-badge">' + categoryLabel(bookmark.category) + '</span>' +
                     '<div class="actions">' +
                     '<button class="edit-btn" data-action="edit" data-id="' + bookmark.id + '">' + i18n('btnEdit') + '</button>' +
